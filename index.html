@@ -4,11 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>nTransactions</title>
+
+<!-- PWA Meta Tags -->
+<meta name="application-name" content="nTransactions">
+<meta name="description" content="Personal finance tracker – expenses, income, loans & budgets">
+<meta name="theme-color" content="#07090f">
+<meta name="background-color" content="#07090f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="nTransactions">
+<meta name="msapplication-TileColor" content="#07090f">
+<meta name="msapplication-tap-highlight" content="no">
+
+<!-- Icons -->
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/nasimulrizvi/index.html/refs/heads/main/Transactions.png">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/nasimulrizvi/index.html/refs/heads/main/Transactions.png">
+<link rel="apple-touch-startup-image" href="https://raw.githubusercontent.com/nasimulrizvi/index.html/refs/heads/main/Transactions.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{font-size:16px;-webkit-tap-highlight-color:transparent;}
@@ -111,9 +128,6 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .loan-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
 .loan-person{font-size:16px;font-weight:800;}
 .loan-type-badge{display:inline-block;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-top:4px;}
-.loan-amounts{text-align:right;}
-.loan-orig{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;}
-.loan-remain{font-size:11px;margin-top:3px;font-weight:600;}
 .loan-prog-wrap{margin:12px 0;}
 .loan-payments{border-top:1px solid var(--borderl);margin-top:12px;padding-top:12px;}
 .loan-pay-item{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text2);padding:4px 0;}
@@ -201,7 +215,7 @@ select.fi{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='
 .col-swatch{width:30px;height:30px;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
 .col-swatch.sel{border-color:#fff;transform:scale(1.15);}
 
-/* SECTION DIVIDER */
+/* LOAN SECTION */
 .loan-section-hdr{display:flex;align-items:center;gap:10px;margin:14px 0 10px;}
 .loan-section-line{flex:1;height:1px;background:var(--borderl);}
 .loan-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3);white-space:nowrap;}
@@ -224,9 +238,31 @@ select.fi{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='
 /* CAT MANAGE */
 .cat-list-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--borderl);}
 .cat-list-item:last-child{border-bottom:none;}
+
+/* PWA INSTALL BANNER */
+#pwa-banner{display:none;position:fixed;bottom:calc(var(--nav) + 10px);left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:480px;background:linear-gradient(135deg,#0c1e14,#081420);border:1px solid rgba(12,233,127,.25);border-radius:16px;padding:13px 16px;z-index:98;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+#pwa-banner.show{display:flex;align-items:center;gap:12px;animation:fadeUp .3s ease;}
+.pwa-icon{width:42px;height:42px;border-radius:10px;background:var(--green-d);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.pwa-text{flex:1;min-width:0;}
+.pwa-t{font-size:13px;font-weight:700;color:var(--text);}
+.pwa-s{font-size:11px;color:var(--text3);margin-top:2px;}
+.pwa-btn{padding:7px 14px;border-radius:9px;background:var(--green);color:#07090f;border:none;font-size:12px;font-weight:800;font-family:'Outfit',sans-serif;cursor:pointer;white-space:nowrap;}
+.pwa-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:2px 4px;flex-shrink:0;}
 </style>
 </head>
 <body>
+
+<!-- PWA Install Banner -->
+<div id="pwa-banner">
+  <div class="pwa-icon">📲</div>
+  <div class="pwa-text">
+    <div class="pwa-t">Install nTransactions</div>
+    <div class="pwa-s">Add to Home Screen for app experience</div>
+  </div>
+  <button class="pwa-btn" id="pwa-install-btn">Install</button>
+  <button class="pwa-close" id="pwa-close-btn">×</button>
+</div>
+
 <div id="app">
   <header class="header">
     <div class="logo">n<span>Transactions</span></div>
@@ -273,15 +309,82 @@ select.fi{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='
     </div>
   </nav>
 </div>
+
 <div class="modal-overlay" id="modal-overlay" onclick="handleOvClick(event)">
   <div class="modal" id="modal"><div class="modal-handle"></div><div id="mc"></div></div>
 </div>
 
 <script>
 // ============================================================
+// PWA – Manifest injected via blob URL (works for single-file)
+// ============================================================
+(function(){
+  const manifest={
+    name:'nTransactions',
+    short_name:'nTransactions',
+    description:'Personal finance tracker – expenses, income, loans & budgets',
+    start_url:'./',
+    scope:'./',
+    display:'standalone',
+    orientation:'portrait-primary',
+    theme_color:'#07090f',
+    background_color:'#07090f',
+    categories:['finance','productivity'],
+    icons:[
+      {src:'https://raw.githubusercontent.com/nasimulrizvi/index.html/refs/heads/main/Transactions.png',sizes:'512x512',type:'image/png',purpose:'any maskable'},
+      {src:'https://raw.githubusercontent.com/nasimulrizvi/index.html/refs/heads/main/Transactions.png',sizes:'192x192',type:'image/png',purpose:'any maskable'}
+    ]
+  };
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('link');
+  link.rel='manifest';link.href=url;
+  document.head.appendChild(link);
+})();
+
+// ============================================================
+// PWA – Service Worker (requires sw.js in same directory)
+// ============================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(() => console.log('SW registered'))
+      .catch(e => console.log('SW skipped:', e.message));
+  });
+}
+
+// ============================================================
+// PWA Install Prompt
+// ============================================================
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  const dismissed=localStorage.getItem('pwa-dismissed');
+  if(!dismissed){
+    setTimeout(()=>document.getElementById('pwa-banner').classList.add('show'),2000);
+  }
+});
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('pwa-banner').classList.remove('show');
+  deferredPrompt=null;
+});
+document.getElementById('pwa-install-btn').addEventListener('click',async()=>{
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  const{outcome}=await deferredPrompt.userChoice;
+  deferredPrompt=null;
+  document.getElementById('pwa-banner').classList.remove('show');
+});
+document.getElementById('pwa-close-btn').addEventListener('click',()=>{
+  document.getElementById('pwa-banner').classList.remove('show');
+  localStorage.setItem('pwa-dismissed','1');
+});
+
+// ============================================================
 // CONSTANTS
 // ============================================================
-const DEFAULT_EXP_CATS = [
+const DEFAULT_EXP_CATS=[
   {id:'education',label:'Education',icon:'📚'},
   {id:'entertainment',label:'Entertainment',icon:'🎮'},
   {id:'transportation',label:'Transportation',icon:'🚌'},
@@ -294,167 +397,105 @@ const DEFAULT_EXP_CATS = [
   {id:'tech',label:'Technology',icon:'💻'},
   {id:'travel',label:'Travel',icon:'✈️'},
 ];
-const DEFAULT_INC_CATS = [
+const DEFAULT_INC_CATS=[
   {id:'family',label:'Parents / Family',icon:'👨‍👩‍👧'},
   {id:'bonus',label:'Bonus / Cash Back',icon:'🎁'},
   {id:'relatives',label:'Relatives',icon:'👥'},
   {id:'other',label:'Other Income',icon:'💰'},
 ];
-// Loan types - direction: 'in' = money comes into wallet, 'out' = money leaves wallet
-const LOAN_TYPES = {
-  deposit:     {label:'Taking a Deposit', short:'Deposit',      icon:'🏦', col:'blue',  walletDir:'in',  childLabel:'Deposit Return',  childDir:'out'},
-  loan_recv:   {label:'Loan Received',    short:'Loan Rcvd',    icon:'💳', col:'amber', walletDir:'in',  childLabel:'Loan Repayment',  childDir:'out'},
-  loan_given:  {label:'Loan Given',       short:'Loan Given',   icon:'🤝', col:'purple',walletDir:'out', childLabel:'Loan Collected',  childDir:'in'},
+const LOAN_TYPES={
+  deposit:    {label:'Taking a Deposit',icon:'🏦',col:'blue',  walletDir:'in', childLabel:'Deposit Return',  childDir:'out'},
+  loan_recv:  {label:'Loan Received',   icon:'💳',col:'amber', walletDir:'in', childLabel:'Loan Repayment',  childDir:'out'},
+  loan_given: {label:'Loan Given',      icon:'🤝',col:'purple',walletDir:'out',childLabel:'Loan Collected',  childDir:'in'},
 };
-const WLT_TYPES = [
-  {id:'bank',   label:'Bank Account', icon:'🏦'},
-  {id:'drawer', label:'Drawer',       icon:'🗄️'},
-  {id:'wallet', label:'Wallet',       icon:'💸'},
-  {id:'cash',   label:'Cash',         icon:'💵'},
-  {id:'mfs',    label:'MFS',          icon:'📱'},
+const WLT_TYPES=[
+  {id:'bank',   label:'Bank Account',icon:'🏦'},
+  {id:'drawer', label:'Drawer',      icon:'🗄️'},
+  {id:'wallet', label:'Wallet',      icon:'👛'},
+  {id:'cash',   label:'Cash',        icon:'💵'},
+  {id:'mfs',    label:'MFS',         icon:'📱'},
 ];
-const COLORS = ['#0ce97f','#4d9fff','#ff3d5a','#ffb020','#9d6fff','#ff6b35','#00d4ff','#f472b6'];
+const COLORS=['#0ce97f','#4d9fff','#ff3d5a','#ffb020','#9d6fff','#ff6b35','#00d4ff','#f472b6'];
 
 // ============================================================
 // STATE
 // ============================================================
-let S = {
-  transactions:[],wallets:[],budgets:[],loans:[],
-  customExpCats:[],customIncCats:[],
-  view:'dashboard',month:todayYM(),
-  syncDbUrl:'',syncPath:'',lastSync:null,
-};
-let txF='all', txQ='', loanF='all', txType='expense', editWltId='', selColor=COLORS[0];
+let S={transactions:[],wallets:[],budgets:[],loans:[],customExpCats:[],customIncCats:[],view:'dashboard',month:todayYM(),syncDbUrl:'',syncPath:'',lastSync:null};
+let txF='all',txQ='',loanF='all',txType='expense',editWltId='',selColor=COLORS[0];
 let syncTimeout=null;
 
 function todayYM(){return new Date().toISOString().slice(0,7);}
 function todayD(){return new Date().toISOString().slice(0,10);}
-
-function getExpCats(){return [...DEFAULT_EXP_CATS,...(S.customExpCats||[])];}
-function getIncCats(){return [...DEFAULT_INC_CATS,...(S.customIncCats||[])];}
+function getExpCats(){return[...DEFAULT_EXP_CATS,...(S.customExpCats||[])];}
+function getIncCats(){return[...DEFAULT_INC_CATS,...(S.customIncCats||[])];}
 
 function load(){
   try{
     const d=localStorage.getItem('ntx4');
     if(d){const p=JSON.parse(d);S={...S,...p,view:'dashboard'};}
-    if(!S.wallets.length) S.wallets=[{id:uid(),name:'Cash',type:'cash',balance:0,color:'#0ce97f',at:todayD()}];
-    if(!S.month) S.month=todayYM();
-    if(!S.customExpCats) S.customExpCats=[];
-    if(!S.customIncCats) S.customIncCats=[];
-    if(!S.loans) S.loans=[];
+    if(!S.wallets.length)S.wallets=[{id:uid(),name:'Cash',type:'cash',balance:0,color:'#0ce97f',at:todayD()}];
+    if(!S.month)S.month=todayYM();
+    if(!S.customExpCats)S.customExpCats=[];
+    if(!S.customIncCats)S.customIncCats=[];
+    if(!S.loans)S.loans=[];
   }catch(e){}
 }
 function saveLocal(){
-  try{localStorage.setItem('ntx4',JSON.stringify({
-    transactions:S.transactions,wallets:S.wallets,budgets:S.budgets,loans:S.loans,
-    customExpCats:S.customExpCats,customIncCats:S.customIncCats,month:S.month,
-    syncDbUrl:S.syncDbUrl,syncPath:S.syncPath,lastSync:S.lastSync
-  }));}catch(e){}
+  try{localStorage.setItem('ntx4',JSON.stringify({transactions:S.transactions,wallets:S.wallets,budgets:S.budgets,loans:S.loans,customExpCats:S.customExpCats,customIncCats:S.customIncCats,month:S.month,syncDbUrl:S.syncDbUrl,syncPath:S.syncPath,lastSync:S.lastSync}));}catch(e){}
 }
 function save(){saveLocal();scheduleSync();}
 
 // ============================================================
-// CLOUD SYNC - Firebase Realtime Database (free, reliable)
-// Setup: console.firebase.google.com → New project → Realtime Database
-//        → Start in test mode → copy the database URL
+// CLOUD SYNC
 // ============================================================
-function fbUrl(){
-  if(!S.syncDbUrl||!S.syncPath)return'';
-  const base=S.syncDbUrl.replace(/\/+$/,'');
-  const path=S.syncPath.replace(/[^a-zA-Z0-9_-]/g,'_');
-  return`${base}/${path}.json`;
-}
-
-function setSyncDot(state){
-  const el=document.getElementById('sync-dot');
-  if(!el)return;
-  el.className='sync-dot'+(state?' '+state:'');
-}
-
+function fbUrl(){if(!S.syncDbUrl||!S.syncPath)return'';return`${S.syncDbUrl.replace(/\/+$/,'')}/${S.syncPath.replace(/[^a-zA-Z0-9_-]/g,'_')}.json`;}
+function setSyncDot(state){const el=document.getElementById('sync-dot');if(!el)return;el.className='sync-dot'+(state?' '+state:'');}
 async function pushSync(){
-  const url=fbUrl();
-  if(!url)return;
-  setSyncDot('busy');
-  try{
-    const payload={transactions:S.transactions,wallets:S.wallets,budgets:S.budgets,loans:S.loans,
-      customExpCats:S.customExpCats||[],customIncCats:S.customIncCats||[],ts:Date.now()};
-    const r=await fetch(url,{method:'PUT',body:JSON.stringify(payload),headers:{'Content-Type':'application/json'}});
-    if(r.ok){S.lastSync=Date.now();saveLocal();setSyncDot('ok');}
-    else{console.error('Sync push failed',r.status);setSyncDot('err');}
-  }catch(e){console.error('Sync push error',e);setSyncDot('err');}
+  const url=fbUrl();if(!url)return;setSyncDot('busy');
+  try{const r=await fetch(url,{method:'PUT',body:JSON.stringify({transactions:S.transactions,wallets:S.wallets,budgets:S.budgets,loans:S.loans,customExpCats:S.customExpCats||[],customIncCats:S.customIncCats||[],ts:Date.now()}),headers:{'Content-Type':'application/json'}});
+    if(r.ok){S.lastSync=Date.now();saveLocal();setSyncDot('ok');}else setSyncDot('err');
+  }catch(e){setSyncDot('err');}
 }
-
 async function pullSync(){
-  const url=fbUrl();
-  if(!url)return;
-  setSyncDot('busy');
-  try{
-    const r=await fetch(url);
-    if(r.ok){
-      const d=await r.json();
+  const url=fbUrl();if(!url)return;setSyncDot('busy');
+  try{const r=await fetch(url);
+    if(r.ok){const d=await r.json();
       if(d&&d.ts&&(!S.lastSync||d.ts>S.lastSync)){
-        S.transactions=d.transactions||S.transactions;
-        S.wallets=d.wallets||S.wallets;
-        S.budgets=d.budgets||S.budgets;
-        S.loans=d.loans||S.loans;
-        S.customExpCats=d.customExpCats||S.customExpCats;
-        S.customIncCats=d.customIncCats||S.customIncCats;
-        S.lastSync=d.ts;
-        saveLocal();renderMain();
-      }
-      setSyncDot('ok');
-    }else{console.error('Sync pull failed',r.status);setSyncDot('err');}
-  }catch(e){console.error('Sync pull error',e);setSyncDot('err');}
+        S.transactions=d.transactions||S.transactions;S.wallets=d.wallets||S.wallets;
+        S.budgets=d.budgets||S.budgets;S.loans=d.loans||S.loans;
+        S.customExpCats=d.customExpCats||S.customExpCats;S.customIncCats=d.customIncCats||S.customIncCats;
+        S.lastSync=d.ts;saveLocal();renderMain();
+      }setSyncDot('ok');
+    }else setSyncDot('err');
+  }catch(e){setSyncDot('err');}
 }
-
-function scheduleSync(){
-  if(!fbUrl())return;
-  clearTimeout(syncTimeout);
-  syncTimeout=setTimeout(pushSync,1400);
-}
-
-// auto pull every 45 sec
+function scheduleSync(){if(!fbUrl())return;clearTimeout(syncTimeout);syncTimeout=setTimeout(pushSync,1400);}
 setInterval(()=>{if(fbUrl())pullSync();},45000);
 
 // ============================================================
 // UTILS
 // ============================================================
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
-function fmt(n){const a=Math.abs(n||0);return '৳'+a.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function fmtD(d){if(!d)return '';return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
-function fmtMY(ym){if(!ym)return '';const[y,m]=ym.split('-');const ms=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return ms[parseInt(m)-1]+' '+y;}
-function getCat(type,id){return (type==='expense'?getExpCats():getIncCats()).find(c=>c.id===id)||{label:id||'?',icon:'📋'};}
-function getWlt(id){return S.wallets.find(w=>w.id===id)||{name:'Unknown',color:'#4a5568',icon:'💳'};}
+function fmt(n){return'৳'+Math.abs(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtD(d){if(!d)return'';return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function fmtMY(ym){if(!ym)return'';const[y,m]=ym.split('-');return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]+' '+y;}
+function getCat(type,id){return(type==='expense'?getExpCats():getIncCats()).find(c=>c.id===id)||{label:id||'?',icon:'📋'};}
+function getWlt(id){return S.wallets.find(w=>w.id===id)||{name:'Unknown',color:'#4a5568'};}
 function totalBal(){return S.wallets.reduce((s,w)=>s+(w.balance||0),0);}
 function mTxs(m){return S.transactions.filter(t=>t.date&&t.date.startsWith(m));}
-function mStats(m){
-  const txs=mTxs(m);
-  const inc=txs.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-  const exp=txs.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-  return{inc,exp,net:inc-exp};
-}
-function catSpend(m){
-  const map={};
-  mTxs(m).filter(t=>t.type==='expense').forEach(t=>{map[t.category]=(map[t.category]||0)+t.amount;});
-  return Object.entries(map).map(([id,amount])=>({...getCat('expense',id),amount})).sort((a,b)=>b.amount-a.amount);
-}
-function loanPaid(loan){return (loan.payments||[]).reduce((s,p)=>s+p.amount,0);}
-function loanRemain(loan){return loan.amount-loanPaid(loan);}
+function mStats(m){const txs=mTxs(m);const inc=txs.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);const exp=txs.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);return{inc,exp,net:inc-exp};}
+function catSpend(m){const map={};mTxs(m).filter(t=>t.type==='expense').forEach(t=>{map[t.category]=(map[t.category]||0)+t.amount;});return Object.entries(map).map(([id,amount])=>({...getCat('expense',id),amount})).sort((a,b)=>b.amount-a.amount);}
+function loanPaid(l){return(l.payments||[]).reduce((s,p)=>s+p.amount,0);}
+function loanRemain(l){return l.amount-loanPaid(l);}
+function curYear(){return S.month.slice(0,4);}
 
 // ============================================================
 // NAVIGATION
 // ============================================================
-function go(view){
-  S.view=view;
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const el=document.getElementById('nav-'+view);
-  if(el)el.classList.add('active');
-  renderMain();
-}
+function go(view){S.view=view;document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));const el=document.getElementById('nav-'+view);if(el)el.classList.add('active');renderMain();}
 function renderMain(){
   const el=document.getElementById('main');
-  const mb=document.getElementById('month-btn');
-  if(mb)mb.textContent=fmtMY(S.month);
+  const mb=document.getElementById('month-btn');if(mb)mb.textContent=fmtMY(S.month);
   let html='';
   if(S.view==='dashboard')html=rDash();
   else if(S.view==='transactions')html=rTxs();
@@ -462,7 +503,6 @@ function renderMain(){
   else if(S.view==='budget')html=rBudget();
   else if(S.view==='loans')html=rLoans();
   el.innerHTML=`<div class="main-inner fade-up">${html}</div>`;
-  // sync dot status
   if(!fbUrl())setSyncDot('');else setSyncDot('ok');
 }
 
@@ -477,11 +517,9 @@ function rDash(){
   const rec=[...S.transactions].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id)).slice(0,5);
   const bars=[];for(let i=5;i>=0;i--){const d=new Date();d.setMonth(d.getMonth()-i);const ym=d.toISOString().slice(0,7);const s=mStats(ym);bars.push({lbl:d.toLocaleDateString('en-US',{month:'short'}),exp:s.exp});}
   const maxB=Math.max(...bars.map(b=>b.exp),1);
-  const pendLoans=S.loans.filter(l=>loanRemain(l)>0);
   const iOwe=S.loans.filter(l=>l.type==='loan_recv'&&loanRemain(l)>0).reduce((s,l)=>s+loanRemain(l),0);
   const owesMe=S.loans.filter(l=>l.type==='loan_given'&&loanRemain(l)>0).reduce((s,l)=>s+loanRemain(l),0);
-
-  return `
+  return`
   <div class="section" style="padding-top:18px;">
     ${!fbUrl()?`<div class="sync-banner">☁️ <span style="flex:1;"><b>Cloud Sync not set up.</b> Data only saves on this device. <button onclick="openSyncModal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-weight:700;font-family:'Outfit',sans-serif;">Set up →</button></span></div>`:''}
     <div class="bal-card">
@@ -493,49 +531,20 @@ function rDash(){
         <div class="bal-stat"><div class="bsl">Expense</div><div class="bsv c-red">${fmt(st.exp)}</div></div>
         <div class="bal-stat"><div class="bsl">Net</div><div class="bsv" style="color:${st.net>=0?'var(--green)':'var(--red)'};">${fmt(st.net)}</div></div>
       </div>
-      ${st.inc>0?`<div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.04);">
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px;"><span>Savings Rate</span><span style="color:${savCol};font-weight:700;">${savR.toFixed(1)}%</span></div>
-        <div class="prog"><div class="prog-fill" style="width:${savR}%;background:${savCol};"></div></div>
-      </div>`:''}
+      ${st.inc>0?`<div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.04);"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px;"><span>Savings Rate</span><span style="color:${savCol};font-weight:700;">${savR.toFixed(1)}%</span></div><div class="prog"><div class="prog-fill" style="width:${savR}%;background:${savCol};"></div></div></div>`:''}
     </div>
   </div>
   <div class="section" style="padding-top:14px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <div class="sec-title" style="margin:0;">6-Month Trend</div>
-      <span style="font-size:11px;color:var(--text3);">Expenses</span>
-    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div class="sec-title" style="margin:0;">6-Month Trend</div><span style="font-size:11px;color:var(--text3);">Expenses</span></div>
     <div class="card" style="padding:14px;">
-      <div class="mini-chart">
-        ${bars.map(b=>{const h=Math.max(3,(b.exp/maxB)*50);const isMax=b.exp===Math.max(...bars.map(x=>x.exp));return`<div class="mcb-wrap"><div class="mcb" style="height:${h}px;background:${isMax?'var(--red)':'var(--green)'};"></div><div class="mcl">${b.lbl}</div></div>`;}).join('')}
-      </div>
+      <div class="mini-chart">${bars.map(b=>{const h=Math.max(3,(b.exp/maxB)*50);const isMax=b.exp===Math.max(...bars.map(x=>x.exp));return`<div class="mcb-wrap"><div class="mcb" style="height:${h}px;background:${isMax?'var(--red)':'var(--green)'};"></div><div class="mcl">${b.lbl}</div></div>`;}).join('')}</div>
     </div>
   </div>
-  ${(iOwe>0||owesMe>0)?`
-  <div class="section" style="padding-top:14px;">
-    <div class="sec-hdr"><div class="sec-title">Loan Summary</div><button class="see-all" onclick="go('loans')">See All →</button></div>
-    <div class="stats-grid">
-      <div class="stat-card" style="border-color:rgba(255,61,90,.14);"><div class="st-lbl">I Owe Others</div><div class="st-val c-red">${fmt(iOwe)}</div></div>
-      <div class="stat-card" style="border-color:rgba(12,233,127,.14);"><div class="st-lbl">Others Owe Me</div><div class="st-val c-green">${fmt(owesMe)}</div></div>
-    </div>
-  </div>`:''}
-  ${cs.length?`
-  <div class="section" style="padding-top:14px;">
-    <div class="sec-hdr"><div class="sec-title">Top Spending</div></div>
-    <div class="card">
-      ${cs.map((c,i)=>{const pct=st.exp>0?(c.amount/st.exp*100):0;const cols=['var(--red)','var(--amber)','var(--blue)','var(--purple)','var(--green)'];return`
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:${i<cs.length-1?'12':'0'}px;">
-        <span style="font-size:19px;">${c.icon}</span>
-        <div style="flex:1;">
-          <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px;"><span>${c.label}</span><span style="font-family:'Space Mono',monospace;font-size:12px;">${fmt(c.amount)}</span></div>
-          <div class="prog"><div class="prog-fill" style="width:${pct}%;background:${cols[i]};"></div></div>
-        </div>
-      </div>`;}).join('')}
-    </div>
-  </div>`:''}
+  ${(iOwe>0||owesMe>0)?`<div class="section" style="padding-top:14px;"><div class="sec-hdr"><div class="sec-title">Loan Summary</div><button class="see-all" onclick="go('loans')">See All →</button></div><div class="stats-grid"><div class="stat-card" style="border-color:rgba(255,61,90,.14);"><div class="st-lbl">I Owe Others</div><div class="st-val c-red">${fmt(iOwe)}</div></div><div class="stat-card" style="border-color:rgba(12,233,127,.14);"><div class="st-lbl">Others Owe Me</div><div class="st-val c-green">${fmt(owesMe)}</div></div></div></div>`:''}
+  ${cs.length?`<div class="section" style="padding-top:14px;"><div class="sec-hdr"><div class="sec-title">Top Spending</div></div><div class="card">${cs.map((c,i)=>{const pct=st.exp>0?(c.amount/st.exp*100):0;const cols=['var(--red)','var(--amber)','var(--blue)','var(--purple)','var(--green)'];return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:${i<cs.length-1?'12':'0'}px;"><span style="font-size:19px;">${c.icon}</span><div style="flex:1;"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px;"><span>${c.label}</span><span style="font-family:'Space Mono',monospace;font-size:12px;">${fmt(c.amount)}</span></div><div class="prog"><div class="prog-fill" style="width:${pct}%;background:${cols[i]};"></div></div></div></div>`;}).join('')}</div></div>`:''}
   <div class="section" style="padding-top:14px;">
     <div class="sec-hdr"><div class="sec-title">Recent Transactions</div><button class="see-all" onclick="go('transactions')">See All →</button></div>
-    ${rec.length?`<div class="card">${rec.map(t=>txHTML(t)).join('')}</div>`:
-    `<div class="empty"><div class="empty-ico">💸</div><div class="empty-t">No transactions yet</div><div class="empty-s">Tap + to add your first one</div></div>`}
+    ${rec.length?`<div class="card">${rec.map(t=>txHTML(t)).join('')}</div>`:`<div class="empty"><div class="empty-ico">💸</div><div class="empty-t">No transactions yet</div><div class="empty-s">Tap + to add your first one</div></div>`}
   </div>
   <div style="height:8px;"></div>`;
 }
@@ -547,18 +556,7 @@ function txHTML(t){
   else{icon='🔄';label='Transfer';ac='var(--blue)';pfx='→';}
   const bg=t.type==='expense'?'var(--red-d)':t.type==='income'?'var(--green-d)':'var(--blue-d)';
   const w=getWlt(t.wallet);
-  return `
-  <div class="tx-item" onclick="showTxD('${t.id}')">
-    <div class="tx-ico" style="background:${bg};">${icon}</div>
-    <div class="tx-inf">
-      <div class="tx-name">${label}</div>
-      <div class="tx-meta">${w.name}${t.note?' · '+t.note:''}</div>
-    </div>
-    <div>
-      <div class="tx-amt" style="color:${ac};">${pfx}${fmt(t.amount)}</div>
-      <div class="tx-dt">${fmtD(t.date)}</div>
-    </div>
-  </div>`;
+  return`<div class="tx-item" onclick="showTxD('${t.id}')"><div class="tx-ico" style="background:${bg};">${icon}</div><div class="tx-inf"><div class="tx-name">${label}</div><div class="tx-meta">${w.name}${t.note?' · '+t.note:''}</div></div><div><div class="tx-amt" style="color:${ac};">${pfx}${fmt(t.amount)}</div><div class="tx-dt">${fmtD(t.date)}</div></div></div>`;
 }
 
 // ============================================================
@@ -569,28 +567,15 @@ function rTxs(){
   if(txF!=='all')txs=txs.filter(t=>t.type===txF);
   if(txQ){const q=txQ.toLowerCase();txs=txs.filter(t=>{const c=t.type==='expense'?getCat('expense',t.category):getCat('income',t.category);return c.label.toLowerCase().includes(q)||(t.note&&t.note.toLowerCase().includes(q));});}
   const groups={};txs.forEach(t=>{const k=fmtD(t.date);if(!groups[k])groups[k]=[];groups[k].push(t);});
-  return `
+  return`
   <div class="section" style="padding-top:16px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;">
       <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;">Transactions</div>
-      <button class="sm-btn-g" onclick="exportXLSX()" title="Export to Excel">⬇ Export .xlsx</button>
+      <button class="sm-btn-g" onclick="exportXLSX()">⬇ Export .xlsx</button>
     </div>
-    <div class="srch-wrap">
-      <span class="srch-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-      <input type="text" placeholder="Search by category or note..." value="${txQ}" oninput="doSearch(this.value)" id="txs-inp">
-    </div>
-    <div class="filter-bar">
-      <button class="fc ${txF==='all'?'active':''}" onclick="setTxF('all')">All</button>
-      <button class="fc ${txF==='expense'?'active':''}" onclick="setTxF('expense')">Expense</button>
-      <button class="fc ${txF==='income'?'active':''}" onclick="setTxF('income')">Income</button>
-      <button class="fc ${txF==='transfer'?'active':''}" onclick="setTxF('transfer')">Transfer</button>
-    </div>
-    ${txs.length===0?`<div class="empty"><div class="empty-ico">🔍</div><div class="empty-t">No transactions found</div><div class="empty-s">Try a different filter or add a new one</div></div>`
-    :Object.entries(groups).map(([date,list])=>`
-    <div style="margin-bottom:14px;">
-      <div class="dg-label">${date}</div>
-      <div class="card">${list.map(t=>txHTML(t)).join('')}</div>
-    </div>`).join('')}
+    <div class="srch-wrap"><span class="srch-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span><input type="text" placeholder="Search by category or note..." value="${txQ}" oninput="doSearch(this.value)" id="txs-inp"></div>
+    <div class="filter-bar"><button class="fc ${txF==='all'?'active':''}" onclick="setTxF('all')">All</button><button class="fc ${txF==='expense'?'active':''}" onclick="setTxF('expense')">Expense</button><button class="fc ${txF==='income'?'active':''}" onclick="setTxF('income')">Income</button><button class="fc ${txF==='transfer'?'active':''}" onclick="setTxF('transfer')">Transfer</button></div>
+    ${txs.length===0?`<div class="empty"><div class="empty-ico">🔍</div><div class="empty-t">No transactions found</div><div class="empty-s">Try a different filter</div></div>`:Object.entries(groups).map(([date,list])=>`<div style="margin-bottom:14px;"><div class="dg-label">${date}</div><div class="card">${list.map(t=>txHTML(t)).join('')}</div></div>`).join('')}
   </div>`;
 }
 function setTxF(f){txF=f;renderMain();setTimeout(()=>{const e=document.getElementById('txs-inp');if(e)e.focus();},50);}
@@ -600,29 +585,14 @@ function doSearch(v){txQ=v;renderMain();setTimeout(()=>{const e=document.getElem
 // WALLETS
 // ============================================================
 function rWallets(){
-  return `
+  return`
   <div class="section" style="padding-top:16px;">
     <div style="background:linear-gradient(135deg,#0d1420,#0a1422);border:1px solid rgba(77,159,255,.14);border-radius:18px;padding:20px;margin-bottom:14px;">
       <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">Total Balance</div>
       <div style="font-family:'Space Mono',monospace;font-size:32px;font-weight:700;color:var(--blue);">${fmt(totalBal())}</div>
       <div style="font-size:12px;color:var(--text3);margin-top:4px;">${S.wallets.length} wallet${S.wallets.length!==1?'s':''}</div>
     </div>
-    ${S.wallets.map(w=>{
-      const wt=WLT_TYPES.find(t=>t.id===w.type)||{icon:'💳',label:'Other'};
-      return`<div class="wlt-card">
-        <div class="wlt-ico" style="background:${w.color}22;">${wt.icon}</div>
-        <div style="flex:1;">
-          <div style="font-size:15px;font-weight:700;">${w.name}</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:2px;">${wt.label}</div>
-        </div>
-        <div style="text-align:right;">
-          <div class="wlt-bal" style="color:${w.balance>=0?'var(--text)':'var(--red)'};">${fmt(w.balance)}</div>
-          <div style="display:flex;gap:6px;margin-top:7px;justify-content:flex-end;">
-            <button class="sm-btn" onclick="openEditWlt('${w.id}')">Edit</button>
-            <button class="del-btn" onclick="delWlt('${w.id}')">🗑</button>
-          </div>
-        </div>
-      </div>`;}).join('')}
+    ${S.wallets.map(w=>{const wt=WLT_TYPES.find(t=>t.id===w.type)||{icon:'💳',label:'Other'};return`<div class="wlt-card"><div class="wlt-ico" style="background:${w.color}22;">${wt.icon}</div><div style="flex:1;"><div style="font-size:15px;font-weight:700;">${w.name}</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">${wt.label}</div></div><div style="text-align:right;"><div class="wlt-bal" style="color:${w.balance>=0?'var(--text)':'var(--red)'};">${fmt(w.balance)}</div><div style="display:flex;gap:6px;margin-top:7px;justify-content:flex-end;"><button class="sm-btn" onclick="openEditWlt('${w.id}')">Edit</button><button class="del-btn" onclick="delWlt('${w.id}')">🗑</button></div></div></div>`;}).join('')}
     <button class="btn btn-s" onclick="openAddWlt()" style="margin-top:4px;">+ Add Wallet</button>
   </div>`;
 }
@@ -631,194 +601,67 @@ function rWallets(){
 // BUDGET
 // ============================================================
 function rBudget(){
-  const st=mStats(S.month);
-  const yr=curYear();
-
-  // yearly totals for the selected year
+  const st=mStats(S.month);const yr=curYear();
   const yrTxs=S.transactions.filter(t=>t.date&&t.date.startsWith(yr));
   const yrExp=yrTxs.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
   const yrInc=yrTxs.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-
-  // monthly overall budget
   const mOb=S.budgets.find(b=>b.category==='overall'&&b.month===S.month&&b.period!=='yearly');
-  // yearly overall budget
   const yOb=S.budgets.find(b=>b.category==='overall'&&b.year===yr&&b.period==='yearly');
-
-  function budgetCard(bgt,spent,label,accentCol){
-    const pct=Math.min(100,(spent/bgt.amount)*100);
-    const col=pct>80?'var(--red)':pct>60?'var(--amber)':'var(--green)';
-    return`<div style="background:linear-gradient(135deg,#0d1420,#0a1422);border:1px solid rgba(${accentCol},.14);border-radius:18px;padding:18px;margin-bottom:12px;">
-      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:5px;">${label}</div>
-      <div style="font-family:'Space Mono',monospace;font-size:26px;font-weight:700;">${fmt(bgt.amount)}</div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin:9px 0 5px;"><span>Spent ${fmt(spent)}</span><span style="color:${col};font-weight:700;">${pct.toFixed(1)}% used</span></div>
-      <div class="prog" style="height:8px;"><div class="prog-fill" style="width:${pct}%;background:${col};"></div></div>
-      <div style="font-size:12px;margin-top:7px;font-weight:700;color:${pct>=100?'var(--red)':pct>80?'var(--amber)':'var(--green)'};">${pct>=100?'⚠ Exceeded!':pct>80?'⚠ Approaching limit':'✓ '+fmt(bgt.amount-spent)+' remaining'}</div>
-    </div>`;
+  function bCard(bgt,spent,label,ac){
+    const pct=Math.min(100,(spent/bgt.amount)*100);const col=pct>80?'var(--red)':pct>60?'var(--amber)':'var(--green)';
+    return`<div style="background:linear-gradient(135deg,#0d1420,#0a1422);border:1px solid rgba(${ac},.14);border-radius:18px;padding:18px;margin-bottom:12px;"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:5px;">${label}</div><div style="font-family:'Space Mono',monospace;font-size:26px;font-weight:700;">${fmt(bgt.amount)}</div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin:9px 0 5px;"><span>Spent ${fmt(spent)}</span><span style="color:${col};font-weight:700;">${pct.toFixed(1)}% used</span></div><div class="prog" style="height:8px;"><div class="prog-fill" style="width:${pct}%;background:${col};"></div></div><div style="font-size:12px;margin-top:7px;font-weight:700;color:${col};">${pct>=100?'⚠ Exceeded!':pct>80?'⚠ Approaching limit':'✓ '+fmt(bgt.amount-spent)+' remaining'}</div></div>`;
   }
-
-  const monthlyOverallHTML=mOb?budgetCard(mOb,st.exp,`Monthly Budget – ${fmtMY(S.month)}`,'255,176,32'):
-    `<div class="card" style="margin-bottom:12px;text-align:center;padding:14px;">
-      <div style="font-size:13px;color:var(--text3);">No monthly budget for ${fmtMY(S.month)}</div>
-      <button onclick="openAddBgt('overall')" style="margin-top:7px;background:none;border:none;color:var(--green);cursor:pointer;font-size:13px;font-weight:700;font-family:'Outfit',sans-serif;">Set Monthly Budget →</button>
-    </div>`;
-
-  const yearlyOverallHTML=yOb?budgetCard(yOb,yrExp,`Yearly Budget – ${yr}`,'77,159,255'):
-    `<div class="card" style="margin-bottom:12px;text-align:center;padding:14px;">
-      <div style="font-size:13px;color:var(--text3);">No yearly budget for ${yr}</div>
-      <button onclick="openAddBgt('yearly')" style="margin-top:7px;background:none;border:none;color:var(--blue);cursor:pointer;font-size:13px;font-weight:700;font-family:'Outfit',sans-serif;">Set Yearly Budget →</button>
-    </div>`;
-
-  // category budgets (monthly)
+  const mHTML=mOb?bCard(mOb,st.exp,`Monthly Budget – ${fmtMY(S.month)}`,'255,176,32'):`<div class="card" style="margin-bottom:12px;text-align:center;padding:14px;"><div style="font-size:13px;color:var(--text3);">No monthly budget for ${fmtMY(S.month)}</div><button onclick="openAddBgt('overall')" style="margin-top:7px;background:none;border:none;color:var(--green);cursor:pointer;font-size:13px;font-weight:700;font-family:'Outfit',sans-serif;">Set Monthly Budget →</button></div>`;
+  const yHTML=yOb?bCard(yOb,yrExp,`Yearly Budget – ${yr}`,'77,159,255'):`<div class="card" style="margin-bottom:12px;text-align:center;padding:14px;"><div style="font-size:13px;color:var(--text3);">No yearly budget for ${yr}</div><button onclick="openAddBgt('yearly')" style="margin-top:7px;background:none;border:none;color:var(--blue);cursor:pointer;font-size:13px;font-weight:700;font-family:'Outfit',sans-serif;">Set Yearly Budget →</button></div>`;
   const catItems=getExpCats().map(c=>{
     const bgt=S.budgets.find(b=>b.category===c.id&&b.month===S.month&&b.period!=='yearly');
     const spent=mTxs(S.month).filter(t=>t.type==='expense'&&t.category===c.id).reduce((s,t)=>s+t.amount,0);
     if(!bgt&&spent===0)return'';
-    const pct=bgt?Math.min(100,(spent/bgt.amount)*100):0;
-    const col=pct>80?'var(--red)':pct>60?'var(--amber)':'var(--green)';
-    return`<div class="bgt-item">
-      <div class="bgt-hdr">
-        <div class="bgt-cat"><span style="font-size:18px;">${c.icon}</span><span>${c.label}</span></div>
-        <div class="bgt-amts">${bgt?`${fmt(spent)} / ${fmt(bgt.amount)}`:`${fmt(spent)} <span style="color:var(--text3);">no limit</span>`}</div>
-      </div>
-      ${bgt?`<div class="prog"><div class="prog-fill" style="width:${pct}%;background:${col};"></div></div>${pct>80?`<div style="font-size:11px;color:${col};margin-top:4px;font-weight:700;">⚠ ${pct>=100?'Exceeded!':pct.toFixed(0)+'% used'}</div>`:''}`:''}
+    const pct=bgt?Math.min(100,(spent/bgt.amount)*100):0;const col=pct>80?'var(--red)':pct>60?'var(--amber)':'var(--green)';
+    return`<div class="bgt-item"><div class="bgt-hdr"><div class="bgt-cat"><span style="font-size:18px;">${c.icon}</span><span>${c.label}</span></div><div class="bgt-amts">${bgt?`${fmt(spent)} / ${fmt(bgt.amount)}`:`${fmt(spent)} <span style="color:var(--text3);">no limit</span>`}</div></div>${bgt?`<div class="prog"><div class="prog-fill" style="width:${pct}%;background:${col};"></div></div>${pct>80?`<div style="font-size:11px;color:${col};margin-top:4px;font-weight:700;">⚠ ${pct>=100?'Exceeded!':pct.toFixed(0)+'% used'}</div>`:''}`:''}
     </div>`;}).filter(Boolean).join('');
-
-  return `
+  return`
   <div class="section" style="padding-top:16px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <div>
-        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700;">Budget</div>
-        <div style="font-weight:800;font-size:16px;">${fmtMY(S.month)} · ${yr}</div>
-      </div>
-      <button class="sm-btn" onclick="openAddBgt()">+ Set Budget</button>
-    </div>
-
-    <div style="display:flex;gap:7px;margin-bottom:14px;background:var(--bg3);padding:4px;border-radius:12px;">
-      <button id="btab-m" class="tab-btn active" onclick="showBgtTab('monthly')" style="flex:1;padding:8px;border-radius:9px;">📅 Monthly</button>
-      <button id="btab-y" class="tab-btn" onclick="showBgtTab('yearly')" style="flex:1;padding:8px;border-radius:9px;">📆 Yearly</button>
-    </div>
-
-    <div id="bgt-monthly">
-      ${monthlyOverallHTML}
-      <div class="card" style="margin-bottom:4px;">
-        ${catItems||`<div class="empty" style="padding:28px;"><div class="empty-ico">📊</div><div class="empty-t">No category budgets for this month</div><div class="empty-s">Tap "+ Set Budget" to add one</div></div>`}
-      </div>
-    </div>
-
-    <div id="bgt-yearly" style="display:none;">
-      ${yearlyOverallHTML}
-      <div class="card" style="padding:14px 16px;">
-        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:10px;">
-          <span style="color:var(--text3);">Total Income ${yr}</span>
-          <span style="font-family:'Space Mono',monospace;font-weight:700;color:var(--green);">${fmt(yrInc)}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:10px;">
-          <span style="color:var(--text3);">Total Expense ${yr}</span>
-          <span style="font-family:'Space Mono',monospace;font-weight:700;color:var(--red);">${fmt(yrExp)}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:13px;border-top:1px solid var(--borderl);padding-top:10px;">
-          <span style="color:var(--text3);">Net Savings ${yr}</span>
-          <span style="font-family:'Space Mono',monospace;font-weight:700;color:${yrInc-yrExp>=0?'var(--green)':'var(--red)'};">${fmt(yrInc-yrExp)}</span>
-        </div>
-      </div>
-    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700;">Budget</div><div style="font-weight:800;font-size:16px;">${fmtMY(S.month)} · ${yr}</div></div><button class="sm-btn" onclick="openAddBgt()">+ Set Budget</button></div>
+    <div style="display:flex;gap:7px;margin-bottom:14px;background:var(--bg3);padding:4px;border-radius:12px;"><button id="btab-m" class="tab-btn active" onclick="showBgtTab('monthly')" style="flex:1;padding:8px;border-radius:9px;">📅 Monthly</button><button id="btab-y" class="tab-btn" onclick="showBgtTab('yearly')" style="flex:1;padding:8px;border-radius:9px;">📆 Yearly</button></div>
+    <div id="bgt-monthly">${mHTML}<div class="card">${catItems||`<div class="empty" style="padding:28px;"><div class="empty-ico">📊</div><div class="empty-t">No category budgets</div><div class="empty-s">Tap "+ Set Budget" to add one</div></div>`}</div></div>
+    <div id="bgt-yearly" style="display:none;">${yHTML}<div class="card" style="padding:14px 16px;"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:10px;"><span style="color:var(--text3);">Total Income ${yr}</span><span style="font-family:'Space Mono',monospace;font-weight:700;color:var(--green);">${fmt(yrInc)}</span></div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:10px;"><span style="color:var(--text3);">Total Expense ${yr}</span><span style="font-family:'Space Mono',monospace;font-weight:700;color:var(--red);">${fmt(yrExp)}</span></div><div style="display:flex;justify-content:space-between;font-size:13px;border-top:1px solid var(--borderl);padding-top:10px;"><span style="color:var(--text3);">Net Savings ${yr}</span><span style="font-family:'Space Mono',monospace;font-weight:700;color:${yrInc-yrExp>=0?'var(--green)':'var(--red)'};">${fmt(yrInc-yrExp)}</span></div></div></div>
   </div>`;
 }
 
 // ============================================================
-// LOANS (fully redesigned)
+// LOANS
 // ============================================================
 function rLoans(){
-  const types=['deposit','loan_recv','loan_given'];
-  const sectionConfig={
-    deposit:  {title:'Deposits',      desc:'Money you received as deposit from others',  acol:'blue'},
-    loan_recv:{title:'Loans Received',desc:'Money you borrowed – repayment tracking',     acol:'amber'},
-    loan_given:{title:'Loans Given',  desc:'Money you lent out – collection tracking',    acol:'green'},
-  };
+  const sectionConfig={deposit:{title:'Deposits',acol:'blue'},loan_recv:{title:'Loans Received',acol:'amber'},loan_given:{title:'Loans Given',acol:'green'}};
   let loans=[...S.loans].sort((a,b)=>b.date.localeCompare(a.date));
   if(loanF!=='all')loans=loans.filter(l=>l.type===loanF);
-
   const iOwe=S.loans.filter(l=>l.type==='loan_recv'&&loanRemain(l)>0).reduce((s,l)=>s+loanRemain(l),0);
   const owesMe=S.loans.filter(l=>l.type==='loan_given'&&loanRemain(l)>0).reduce((s,l)=>s+loanRemain(l),0);
   const depPend=S.loans.filter(l=>l.type==='deposit'&&loanRemain(l)>0).reduce((s,l)=>s+loanRemain(l),0);
-
-  function loanCardHTML(l){
-    const cfg=LOAN_TYPES[l.type];
-    const sc=sectionConfig[l.type];
-    const paid=loanPaid(l);
-    const remain=loanRemain(l);
+  function lCard(l){
+    const cfg=LOAN_TYPES[l.type];const sc=sectionConfig[l.type];
+    const paid=loanPaid(l);const remain=loanRemain(l);
     const pct=Math.min(100,(paid/l.amount)*100);
     const pcol=remain<=0?'var(--green)':pct>50?'var(--amber)':'var(--red)';
-    const w=getWlt(l.wallet);
-    return`<div class="loan-card" id="lc-${l.id}">
-      <div class="loan-hdr">
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:22px;">${cfg.icon}</span>
-            <div>
-              <div class="loan-person">${l.person}</div>
-              <span class="loan-type-badge" style="background:var(--${sc.acol}-d);color:var(--${sc.acol});">${cfg.label}</span>
-            </div>
-          </div>
-          <div style="font-size:11px;color:var(--text3);margin-top:8px;">📅 ${fmtD(l.date)}${l.dueDate?' · Due: '+fmtD(l.dueDate):''}${l.note?' · '+l.note:''}</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:2px;"> ৳  ${l.wallet?getWlt(l.wallet).name:'No wallet linked'}</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div class="loan-orig" style="color:var(--${sc.acol});">${fmt(l.amount)}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px;">Original</div>
-          ${remain>0?`<div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--red);margin-top:6px;">${fmt(remain)}</div><div style="font-size:10px;color:var(--text3);">Remaining</div>`:`<div style="font-size:12px;color:var(--green);font-weight:700;margin-top:6px;">✓ Settled</div>`}
-        </div>
-      </div>
-      <div class="loan-prog-wrap">
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px;"><span>Paid ${fmt(paid)}</span><span style="color:${pcol};font-weight:700;">${pct.toFixed(0)}%</span></div>
-        <div class="prog" style="height:8px;"><div class="prog-fill" style="width:${pct}%;background:${pcol};"></div></div>
-      </div>
-      ${(l.payments&&l.payments.length)?`
-      <div class="loan-payments">
-        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:7px;">Payment History</div>
-        ${l.payments.map((p,i)=>`
-        <div class="loan-pay-item">
-          <span>🗓 ${fmtD(p.date)}${p.note?' · '+p.note:''}${p.wallet?' · ৳ '+getWlt(p.wallet).name:''}</span>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-family:'Space Mono',monospace;font-weight:700;color:var(--green);">${fmt(p.amount)}</span>
-            <button class="del-btn" style="width:22px;height:22px;font-size:11px;" onclick="delLoanPayment('${l.id}',${i})">×</button>
-          </div>
-        </div>`).join('')}
-      </div>`:''}
-      <div class="loan-actions">
-        ${remain>0?`<button class="sm-btn-g" onclick="openAddLoanPayment('${l.id}')">+ Add ${cfg.childLabel}</button>`:''}
-        ${remain>0?`<button class="sm-btn" onclick="settleFullLoan('${l.id}')">✓ Fully Settle</button>`:''}
-        <button class="del-btn" style="margin-left:auto;" onclick="delLoan('${l.id}')">🗑</button>
-      </div>
-    </div>`;
+    return`<div class="loan-card"><div class="loan-hdr"><div><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:22px;">${cfg.icon}</span><div><div class="loan-person">${l.person}</div><span class="loan-type-badge" style="background:var(--${sc.acol}-d);color:var(--${sc.acol});">${cfg.label}</span></div></div><div style="font-size:11px;color:var(--text3);margin-top:8px;">📅 ${fmtD(l.date)}${l.dueDate?' · Due: '+fmtD(l.dueDate):''}${l.note?' · '+l.note:''}</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">👛 ${l.wallet?getWlt(l.wallet).name:'No wallet linked'}</div></div><div style="text-align:right;flex-shrink:0;"><div style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--${sc.acol});">${fmt(l.amount)}</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">Original</div>${remain>0?`<div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--red);margin-top:6px;">${fmt(remain)}</div><div style="font-size:10px;color:var(--text3);">Remaining</div>`:`<div style="font-size:12px;color:var(--green);font-weight:700;margin-top:6px;">✓ Settled</div>`}</div></div>
+    <div class="loan-prog-wrap"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px;"><span>Paid ${fmt(paid)}</span><span style="color:${pcol};font-weight:700;">${pct.toFixed(0)}%</span></div><div class="prog" style="height:8px;"><div class="prog-fill" style="width:${pct}%;background:${pcol};"></div></div></div>
+    ${(l.payments&&l.payments.length)?`<div class="loan-payments"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:7px;">Payment History</div>${l.payments.map((p,i)=>`<div class="loan-pay-item"><span>🗓 ${fmtD(p.date)}${p.note?' · '+p.note:''}${p.wallet?' · 👛 '+getWlt(p.wallet).name:''}</span><div style="display:flex;align-items:center;gap:8px;"><span style="font-family:'Space Mono',monospace;font-weight:700;color:var(--green);">${fmt(p.amount)}</span><button class="del-btn" style="width:22px;height:22px;font-size:11px;" onclick="delLoanPayment('${l.id}',${i})">×</button></div></div>`).join('')}</div>`:''}
+    <div class="loan-actions">${remain>0?`<button class="sm-btn-g" onclick="openAddLoanPayment('${l.id}')">+ Add ${cfg.childLabel}</button>`:''} ${remain>0?`<button class="sm-btn" onclick="settleFullLoan('${l.id}')">✓ Fully Settle</button>`:''}<button class="del-btn" style="margin-left:auto;" onclick="delLoan('${l.id}')">🗑</button></div></div>`;
   }
-
-  const sections=types.map(type=>{
+  const sections=['deposit','loan_recv','loan_given'].map(type=>{
     if(loanF!=='all'&&loanF!==type)return'';
-    const typLoans=loans.filter(l=>l.type===type);
-    if(!typLoans.length&&loanF!=='all')return'';
-    const sc=sectionConfig[type];
-    return`
-    <div class="loan-section-hdr"><div class="loan-section-line"></div><div class="loan-section-title">${sc.title}</div><div class="loan-section-line"></div></div>
-    ${typLoans.length?typLoans.map(l=>loanCardHTML(l)).join(''):
-    `<div style="text-align:center;padding:18px 0;color:var(--text3);font-size:13px;">No records yet</div>`}`;
+    const sc=sectionConfig[type];const tl=loans.filter(l=>l.type===type);
+    if(!tl.length&&loanF!=='all')return'';
+    return`<div class="loan-section-hdr"><div class="loan-section-line"></div><div class="loan-section-title">${sc.title}</div><div class="loan-section-line"></div></div>${tl.length?tl.map(l=>lCard(l)).join(''):`<div style="text-align:center;padding:18px 0;color:var(--text3);font-size:13px;">No records yet</div>`}`;
   }).join('');
-
-  return `
+  return`
   <div class="section" style="padding-top:16px;">
-    <div class="stats-grid" style="margin-bottom:14px;">
-      <div class="stat-card" style="border-color:rgba(255,61,90,.14);"><div class="st-lbl">I Owe Others</div><div class="st-val c-red">${fmt(iOwe)}</div></div>
-      <div class="stat-card" style="border-color:rgba(12,233,127,.14);"><div class="st-lbl">Others Owe Me</div><div class="st-val c-green">${fmt(owesMe)}</div></div>
-    </div>
+    <div class="stats-grid" style="margin-bottom:14px;"><div class="stat-card" style="border-color:rgba(255,61,90,.14);"><div class="st-lbl">I Owe Others</div><div class="st-val c-red">${fmt(iOwe)}</div></div><div class="stat-card" style="border-color:rgba(12,233,127,.14);"><div class="st-lbl">Others Owe Me</div><div class="st-val c-green">${fmt(owesMe)}</div></div></div>
     ${depPend>0?`<div style="background:var(--blue-d);border:1px solid rgba(77,159,255,.2);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--blue);font-weight:700;">🏦 Pending deposits to return: ${fmt(depPend)}</div>`:''}
-    <div class="filter-bar">
-      <button class="fc ${loanF==='all'?'active':''}" onclick="setLoanF('all')">All</button>
-      <button class="fc ${loanF==='deposit'?'active':''}" onclick="setLoanF('deposit')">🏦 Deposits</button>
-      <button class="fc ${loanF==='loan_recv'?'active':''}" onclick="setLoanF('loan_recv')">💳 Received</button>
-      <button class="fc ${loanF==='loan_given'?'active':''}" onclick="setLoanF('loan_given')">🤝 Given</button>
-    </div>
+    <div class="filter-bar"><button class="fc ${loanF==='all'?'active':''}" onclick="setLoanF('all')">All</button><button class="fc ${loanF==='deposit'?'active':''}" onclick="setLoanF('deposit')">🏦 Deposits</button><button class="fc ${loanF==='loan_recv'?'active':''}" onclick="setLoanF('loan_recv')">💳 Received</button><button class="fc ${loanF==='loan_given'?'active':''}" onclick="setLoanF('loan_given')">🤝 Given</button></div>
     <button class="btn btn-s" onclick="openAddLoan()" style="margin-bottom:14px;">+ New Entry</button>
-    ${S.loans.length===0?`<div class="empty"><div class="empty-ico">🏦</div><div class="empty-t">No records yet</div><div class="empty-s">Track deposits, loans received, and loans given</div></div>`:sections}
+    ${S.loans.length===0?`<div class="empty"><div class="empty-ico">🏦</div><div class="empty-t">No records yet</div><div class="empty-s">Track deposits, loans received & given</div></div>`:sections}
   </div>`;
 }
 function setLoanF(f){loanF=f;renderMain();}
@@ -830,42 +673,18 @@ function openModal(html){document.getElementById('mc').innerHTML=html;document.g
 function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
 function handleOvClick(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
 
-// ---- ADD TRANSACTION (new order: Wallet → Date → Category → Amount → Note) ----
 function openAddTx(){txType='expense';openModal(txModalHTML());}
-function txCatOpts(type){
-  const cats=type==='expense'?getExpCats():getIncCats();
-  return `<option value="">Select a category</option>`+cats.map(c=>`<option value="${c.id}">${c.icon} ${c.label}</option>`).join('');
-}
+function txCatOpts(type){const cats=type==='expense'?getExpCats():getIncCats();return`<option value="">Select a category</option>`+cats.map(c=>`<option value="${c.id}">${c.icon} ${c.label}</option>`).join('');}
 function txModalHTML(){
   const wOpts=S.wallets.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
-  let body='';
-  if(txType!=='transfer'){
-    body=`
+  let body=txType!=='transfer'?`
     <div class="fg"><label class="fl">Wallet</label><select class="fi" id="tx-w">${wOpts}</select></div>
     <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="tx-dt" value="${todayD()}"></div>
-    <div class="fg"><label class="fl">Category <button onclick="openManageCats('${txType}')" style="background:none;border:none;color:var(--blue);font-size:11px;cursor:pointer;font-weight:700;font-family:'Outfit',sans-serif;margin-left:6px;">Manage →</button></label>
-      <select class="fi" id="tx-cat">${txCatOpts(txType)}</select>
-    </div>
+    <div class="fg"><label class="fl">Category <button onclick="openManageCats('${txType}')" style="background:none;border:none;color:var(--blue);font-size:11px;cursor:pointer;font-weight:700;font-family:'Outfit',sans-serif;margin-left:6px;">Manage →</button></label><select class="fi" id="tx-cat">${txCatOpts(txType)}</select></div>
     <div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="tx-amt" placeholder="0.00" min="0" step="0.01"></div></div>
-    <div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="tx-note" placeholder="What was this for?"></div>`;
-  }else{
-    body=`
-    <div class="fg"><label class="fl">From Wallet</label><select class="fi" id="tx-w">${wOpts}</select></div>
-    <div class="fg"><label class="fl">To Wallet</label><select class="fi" id="tx-tw">${wOpts}</select></div>
-    <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="tx-dt" value="${todayD()}"></div>
-    <div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="tx-amt" placeholder="0.00" min="0" step="0.01"></div></div>
-    <div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="tx-note" placeholder="Reason"></div>`;
-  }
-  return `
-  <div class="modal-title">Add Transaction</div>
-  <div class="tab-grp">
-    <button class="tab-btn te ${txType==='expense'?'active':''}" onclick="swTxT('expense')">Expense</button>
-    <button class="tab-btn ti ${txType==='income'?'active':''}" onclick="swTxT('income')">Cash In</button>
-    <button class="tab-btn tt ${txType==='transfer'?'active':''}" onclick="swTxT('transfer')">Transfer</button>
-  </div>
-  ${body}
-  <button class="btn btn-p" onclick="submitTx()">Save Transaction</button>
-  <button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`;
+    <div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="tx-note" placeholder="What was this for?"></div>`:
+    `<div class="fg"><label class="fl">From Wallet</label><select class="fi" id="tx-w">${wOpts}</select></div><div class="fg"><label class="fl">To Wallet</label><select class="fi" id="tx-tw">${wOpts}</select></div><div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="tx-dt" value="${todayD()}"></div><div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="tx-amt" placeholder="0.00" min="0" step="0.01"></div></div><div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="tx-note" placeholder="Reason"></div>`;
+  return`<div class="modal-title">Add Transaction</div><div class="tab-grp"><button class="tab-btn te ${txType==='expense'?'active':''}" onclick="swTxT('expense')">Expense</button><button class="tab-btn ti ${txType==='income'?'active':''}" onclick="swTxT('income')">Cash In</button><button class="tab-btn tt ${txType==='transfer'?'active':''}" onclick="swTxT('transfer')">Transfer</button></div>${body}<button class="btn btn-p" onclick="submitTx()">Save Transaction</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`;
 }
 function swTxT(t){txType=t;document.getElementById('mc').innerHTML=txModalHTML();}
 function submitTx(){
@@ -889,7 +708,6 @@ function submitTx(){
   S.transactions.unshift(tx);save();closeModal();renderMain();
 }
 
-// ---- TX DETAIL ----
 function showTxD(id){
   const t=S.transactions.find(x=>x.id===id);if(!t)return;
   let icon,label,ac,pfx;
@@ -897,22 +715,7 @@ function showTxD(id){
   else if(t.type==='income'){const c=getCat('income',t.category);icon=c.icon;label=c.label;ac='var(--green)';pfx='+';}
   else{icon='🔄';label='Transfer';ac='var(--blue)';pfx='→';}
   const w=getWlt(t.wallet);
-  openModal(`
-  <div class="modal-title">Transaction Detail</div>
-  <div style="text-align:center;padding:16px 0 20px;">
-    <div style="font-size:52px;margin-bottom:8px;">${icon}</div>
-    <div style="font-size:13px;color:var(--text2);margin-bottom:6px;">${label}</div>
-    <div style="font-family:'Space Mono',monospace;font-size:34px;font-weight:700;color:${ac};">${pfx}${fmt(t.amount)}</div>
-  </div>
-  <div class="card" style="margin-bottom:16px;">
-    <div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Date</span><span style="font-weight:700;margin-left:auto;">${fmtD(t.date)}</span></div>
-    <div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Type</span><span style="font-weight:700;margin-left:auto;text-transform:capitalize;">${t.type}</span></div>
-    <div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Wallet</span><span style="font-weight:700;margin-left:auto;">${w.name}</span></div>
-    ${t.type==='transfer'?`<div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">To Wallet</span><span style="font-weight:700;margin-left:auto;">${getWlt(t.toWallet).name}</span></div>`:''}
-    <div class="tx-item" style="cursor:default;border-bottom:none;"><span style="color:var(--text3);">Note</span><span style="font-weight:700;margin-left:auto;">${t.note||'–'}</span></div>
-  </div>
-  <button class="btn btn-d" onclick="delTx('${t.id}')">🗑 Delete Transaction</button>
-  <button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Close</button>`);
+  openModal(`<div class="modal-title">Transaction Detail</div><div style="text-align:center;padding:16px 0 20px;"><div style="font-size:52px;margin-bottom:8px;">${icon}</div><div style="font-size:13px;color:var(--text2);margin-bottom:6px;">${label}</div><div style="font-family:'Space Mono',monospace;font-size:34px;font-weight:700;color:${ac};">${pfx}${fmt(t.amount)}</div></div><div class="card" style="margin-bottom:16px;"><div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Date</span><span style="font-weight:700;margin-left:auto;">${fmtD(t.date)}</span></div><div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Type</span><span style="font-weight:700;margin-left:auto;text-transform:capitalize;">${t.type}</span></div><div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Wallet</span><span style="font-weight:700;margin-left:auto;">${w.name}</span></div>${t.type==='transfer'?`<div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">To Wallet</span><span style="font-weight:700;margin-left:auto;">${getWlt(t.toWallet).name}</span></div>`:''}<div class="tx-item" style="cursor:default;border-bottom:none;"><span style="color:var(--text3);">Note</span><span style="font-weight:700;margin-left:auto;">${t.note||'–'}</span></div></div><button class="btn btn-d" onclick="delTx('${t.id}')">🗑 Delete Transaction</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Close</button>`);
 }
 function delTx(id){
   const t=S.transactions.find(x=>x.id===id);if(!t)return;
@@ -923,398 +726,119 @@ function delTx(id){
   S.transactions=S.transactions.filter(x=>x.id!==id);save();closeModal();renderMain();
 }
 
-// ---- CATEGORY MANAGE ----
 function openManageCats(type){
-  const isExp=type==='expense';
-  const customs=isExp?S.customExpCats:S.customIncCats;
-  openModal(`
-  <div class="modal-title">Manage ${isExp?'Expense':'Income'} Categories</div>
-  <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Default categories cannot be deleted. You can add custom ones below.</div>
-  <div class="card" style="margin-bottom:16px;">
-    ${(isExp?DEFAULT_EXP_CATS:DEFAULT_INC_CATS).map(c=>`<div class="cat-list-item"><span>${c.icon} ${c.label}</span><span style="font-size:10px;color:var(--text3);">Default</span></div>`).join('')}
-    ${customs.map((c,i)=>`<div class="cat-list-item"><span>${c.icon} ${c.label}</span><button class="del-btn" style="width:24px;height:24px;font-size:12px;" onclick="delCustomCat('${type}',${i})">×</button></div>`).join('')}
-  </div>
-  <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.8px;">Add Custom Category</div>
-  <div style="display:flex;gap:8px;margin-bottom:10px;">
-    <input type="text" class="fi" id="nc-icon" placeholder="Emoji" style="width:60px;text-align:center;padding:11px 8px;">
-    <input type="text" class="fi" id="nc-name" placeholder="Category name" style="flex:1;">
-  </div>
-  <button class="btn btn-p" onclick="addCustomCat('${type}')">Add Category</button>
-  <button class="btn btn-s" onclick="openAddTx()" style="margin-top:8px;">← Back</button>`);
+  const isExp=type==='expense';const customs=isExp?S.customExpCats:S.customIncCats;
+  openModal(`<div class="modal-title">Manage ${isExp?'Expense':'Income'} Categories</div><div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Default categories cannot be deleted.</div><div class="card" style="margin-bottom:16px;">${(isExp?DEFAULT_EXP_CATS:DEFAULT_INC_CATS).map(c=>`<div class="cat-list-item"><span>${c.icon} ${c.label}</span><span style="font-size:10px;color:var(--text3);">Default</span></div>`).join('')}${customs.map((c,i)=>`<div class="cat-list-item"><span>${c.icon} ${c.label}</span><button class="del-btn" style="width:24px;height:24px;font-size:12px;" onclick="delCustomCat('${type}',${i})">×</button></div>`).join('')}</div><div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.8px;">Add Custom Category</div><div style="display:flex;gap:8px;margin-bottom:10px;"><input type="text" class="fi" id="nc-icon" placeholder="Emoji" style="width:60px;text-align:center;padding:11px 8px;"><input type="text" class="fi" id="nc-name" placeholder="Category name" style="flex:1;"></div><button class="btn btn-p" onclick="addCustomCat('${type}')">Add Category</button><button class="btn btn-s" onclick="openAddTx()" style="margin-top:8px;">← Back</button>`);
 }
-function addCustomCat(type){
-  const icon=document.getElementById('nc-icon').value.trim()||'📌';
-  const label=document.getElementById('nc-name').value.trim();
-  if(!label)return alert('Enter a category name.');
-  const c={id:'custom_'+uid(),label,icon};
-  if(type==='expense')S.customExpCats.push(c);else S.customIncCats.push(c);
-  save();openManageCats(type);
-}
-function delCustomCat(type,idx){
-  if(!confirm('Delete this category?'))return;
-  if(type==='expense')S.customExpCats.splice(idx,1);else S.customIncCats.splice(idx,1);
-  save();openManageCats(type);
-}
+function addCustomCat(type){const icon=document.getElementById('nc-icon').value.trim()||'📌';const label=document.getElementById('nc-name').value.trim();if(!label)return alert('Enter a category name.');const c={id:'custom_'+uid(),label,icon};if(type==='expense')S.customExpCats.push(c);else S.customIncCats.push(c);save();openManageCats(type);}
+function delCustomCat(type,idx){if(!confirm('Delete this category?'))return;if(type==='expense')S.customExpCats.splice(idx,1);else S.customIncCats.splice(idx,1);save();openManageCats(type);}
 
-// ---- WALLETS ----
 function openAddWlt(){editWltId='';selColor=COLORS[0];showWltModal();}
 function openEditWlt(id){editWltId=id;const w=S.wallets.find(x=>x.id===id);selColor=w?w.color:COLORS[0];showWltModal();}
 function showWltModal(){
   const e=editWltId?S.wallets.find(x=>x.id===editWltId):null;
-  openModal(`
-  <div class="modal-title">${e?'Edit':'Add'} Wallet</div>
-  <div class="fg"><label class="fl">Name</label><input type="text" class="fi" id="w-nm" placeholder="e.g. bKash Main" value="${e?e.name:''}"></div>
-  <div class="fg"><label class="fl">Type</label>
-    <select class="fi" id="w-tp">
-      ${WLT_TYPES.map(t=>`<option value="${t.id}" ${e&&e.type===t.id?'selected':''}>${t.icon} ${t.label}</option>`).join('')}
-    </select>
-  </div>
-  <div class="fg"><label class="fl">${e?'Current':'Initial'} Balance (৳)</label>
-    <div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="w-bal" placeholder="0.00" value="${e?e.balance:0}"></div>
-  </div>
-  <div class="fg"><label class="fl">Color</label>
-    <div class="col-picker" id="col-pk">${COLORS.map(c=>`<div class="col-swatch${selColor===c?' sel':''}" style="background:${c};" onclick="pickCol('${c}')" data-c="${c}"></div>`).join('')}
-    </div>
-  </div>
-  <button class="btn btn-p" onclick="submitWlt()">${e?'Update':'Add'} Wallet</button>
-  <button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+  openModal(`<div class="modal-title">${e?'Edit':'Add'} Wallet</div><div class="fg"><label class="fl">Name</label><input type="text" class="fi" id="w-nm" placeholder="e.g. bKash Main" value="${e?e.name:''}"></div><div class="fg"><label class="fl">Type</label><select class="fi" id="w-tp">${WLT_TYPES.map(t=>`<option value="${t.id}" ${e&&e.type===t.id?'selected':''}>${t.icon} ${t.label}</option>`).join('')}</select></div><div class="fg"><label class="fl">${e?'Current':'Initial'} Balance (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="w-bal" placeholder="0.00" value="${e?e.balance:0}"></div></div><div class="fg"><label class="fl">Color</label><div class="col-picker">${COLORS.map(c=>`<div class="col-swatch${selColor===c?' sel':''}" style="background:${c};" onclick="pickCol('${c}')" data-c="${c}"></div>`).join('')}</div></div><button class="btn btn-p" onclick="submitWlt()">${e?'Update':'Add'} Wallet</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
 function pickCol(c){selColor=c;document.querySelectorAll('.col-swatch').forEach(el=>el.classList.toggle('sel',el.dataset.c===c));}
 function submitWlt(){
-  const nm=document.getElementById('w-nm').value.trim();
-  const tp=document.getElementById('w-tp').value;
-  const bal=parseFloat(document.getElementById('w-bal').value)||0;
+  const nm=document.getElementById('w-nm').value.trim();const tp=document.getElementById('w-tp').value;const bal=parseFloat(document.getElementById('w-bal').value)||0;
   if(!nm)return alert('Enter a wallet name.');
   if(editWltId){const w=S.wallets.find(x=>x.id===editWltId);if(w){w.name=nm;w.type=tp;w.balance=bal;w.color=selColor;}}
   else S.wallets.push({id:uid(),name:nm,type:tp,balance:bal,color:selColor,at:todayD()});
   save();closeModal();renderMain();
 }
-function delWlt(id){
-  const w=S.wallets.find(x=>x.id===id);if(!w)return;
-  if(!confirm(`Delete wallet "${w.name}"?`))return;
-  S.wallets=S.wallets.filter(x=>x.id!==id);save();renderMain();
-}
-
-// ---- BUDGET ----
-function curYear(){return S.month.slice(0,4);}
+function delWlt(id){const w=S.wallets.find(x=>x.id===id);if(!w)return;if(!confirm(`Delete wallet "${w.name}"?`))return;S.wallets=S.wallets.filter(x=>x.id!==id);save();renderMain();}
 
 function openAddBgt(pre){
-  openModal(`
-  <div class="modal-title">Set Budget</div>
-  <div class="fg"><label class="fl">Budget Period</label>
-    <select class="fi" id="b-period" onchange="bgtPeriodChanged()">
-      <option value="monthly" ${pre!=='yearly'?'selected':''}>📅 Monthly – ${fmtMY(S.month)}</option>
-      <option value="yearly" ${pre==='yearly'?'selected':''}>📆 Yearly – ${curYear()}</option>
-    </select>
-  </div>
-  <div class="fg"><label class="fl">Category</label>
-    <select class="fi" id="b-cat">
-      <option value="overall" ${pre==='overall'||pre==='yearly'?'selected':''}>📊 Overall Budget</option>
-      ${getExpCats().map(c=>`<option value="${c.id}">${c.icon} ${c.label}</option>`).join('')}
-    </select>
-  </div>
-  <div class="fg"><label class="fl">Budget Amount (৳)</label>
-    <div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="b-amt" placeholder="0.00" min="0"></div>
-  </div>
-  <div id="b-hint" style="font-size:12px;color:var(--text3);margin-bottom:14px;">Applies to ${fmtMY(S.month)}</div>
-  <button class="btn btn-p" onclick="submitBgt()">Save Budget</button>
-  <button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+  openModal(`<div class="modal-title">Set Budget</div><div class="fg"><label class="fl">Budget Period</label><select class="fi" id="b-period" onchange="bgtPeriodChanged()"><option value="monthly" ${pre!=='yearly'?'selected':''}>📅 Monthly – ${fmtMY(S.month)}</option><option value="yearly" ${pre==='yearly'?'selected':''}>📆 Yearly – ${curYear()}</option></select></div><div class="fg"><label class="fl">Category</label><select class="fi" id="b-cat"><option value="overall" ${pre==='overall'||pre==='yearly'?'selected':''}>📊 Overall Budget</option>${getExpCats().map(c=>`<option value="${c.id}">${c.icon} ${c.label}</option>`).join('')}</select></div><div class="fg"><label class="fl">Budget Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="b-amt" placeholder="0.00" min="0"></div></div><div id="b-hint" style="font-size:12px;color:var(--text3);margin-bottom:14px;">Applies to ${fmtMY(S.month)}</div><button class="btn btn-p" onclick="submitBgt()">Save Budget</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
-
-function bgtPeriodChanged(){
-  const p=document.getElementById('b-period').value;
-  const hint=document.getElementById('b-hint');
-  if(hint)hint.textContent=p==='yearly'?`Applies to full year ${curYear()}`:`Applies to ${fmtMY(S.month)}`;
-}
-
+function bgtPeriodChanged(){const p=document.getElementById('b-period').value;const h=document.getElementById('b-hint');if(h)h.textContent=p==='yearly'?`Applies to full year ${curYear()}`:`Applies to ${fmtMY(S.month)}`;}
 function submitBgt(){
-  const period=document.getElementById('b-period').value;
-  const cat=document.getElementById('b-cat').value;
-  const amt=parseFloat(document.getElementById('b-amt').value);
+  const period=document.getElementById('b-period').value;const cat=document.getElementById('b-cat').value;const amt=parseFloat(document.getElementById('b-amt').value);
   if(!amt||amt<=0)return alert('Enter a valid amount.');
-  if(period==='yearly'){
-    const yr=curYear();
-    const idx=S.budgets.findIndex(b=>b.category===cat&&b.year===yr&&b.period==='yearly');
-    if(idx>=0)S.budgets[idx].amount=amt;
-    else S.budgets.push({id:uid(),category:cat,amount:amt,year:yr,period:'yearly'});
-  }else{
-    const idx=S.budgets.findIndex(b=>b.category===cat&&b.month===S.month&&b.period!=='yearly');
-    if(idx>=0)S.budgets[idx].amount=amt;
-    else S.budgets.push({id:uid(),category:cat,amount:amt,month:S.month,period:'monthly'});
-  }
+  if(period==='yearly'){const yr=curYear();const idx=S.budgets.findIndex(b=>b.category===cat&&b.year===yr&&b.period==='yearly');if(idx>=0)S.budgets[idx].amount=amt;else S.budgets.push({id:uid(),category:cat,amount:amt,year:yr,period:'yearly'});}
+  else{const idx=S.budgets.findIndex(b=>b.category===cat&&b.month===S.month&&b.period!=='yearly');if(idx>=0)S.budgets[idx].amount=amt;else S.budgets.push({id:uid(),category:cat,amount:amt,month:S.month,period:'monthly'});}
   save();closeModal();renderMain();
 }
+function showBgtTab(tab){
+  const m=document.getElementById('bgt-monthly');const y=document.getElementById('bgt-yearly');
+  const tm=document.getElementById('btab-m');const ty=document.getElementById('btab-y');
+  if(!m||!y)return;
+  if(tab==='monthly'){m.style.display='';y.style.display='none';if(tm)tm.classList.add('active');if(ty)ty.classList.remove('active');}
+  else{m.style.display='none';y.style.display='';if(ty)ty.classList.add('active');if(tm)tm.classList.remove('active');}
+}
 
-// ---- LOANS ----
 function openAddLoan(){
   const wOpts=S.wallets.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
-  openModal(`
-  <div class="modal-title">New Loan / Deposit Entry</div>
-  <div class="fg"><label class="fl">Type</label>
-    <select class="fi" id="ln-tp" onchange="lnTypeChanged()">
-      <option value="deposit">🏦 Taking a Deposit</option>
-      <option value="loan_recv">💳 Loan Received</option>
-      <option value="loan_given">🤝 Loan Given</option>
-    </select>
-  </div>
-  <div id="ln-wallet-info" style="font-size:12px;background:var(--blue-d);border:1px solid rgba(77,159,255,.2);border-radius:10px;padding:9px 12px;margin-bottom:14px;color:var(--blue);">
-    💡 Taking a Deposit: money will be <b>added</b> to selected wallet (optional)
-  </div>
-  <div class="fg"><label class="fl">Person / Organization</label><input type="text" class="fi" id="ln-pr" placeholder="Name"></div>
-  <div class="fg"><label class="fl">Amount (৳)</label>
-    <div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="ln-amt" placeholder="0.00" min="0"></div>
-  </div>
-  <div class="fg">
-    <label class="fl">Wallet <span style="color:var(--text3);text-transform:none;letter-spacing:0;font-weight:500;">(optional – select to affect balance)</span></label>
-    <select class="fi" id="ln-w">
-      <option value="">Select a wellet</option>
-      ${wOpts}
-    </select>
-  </div>
-  <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="ln-dt" value="${todayD()}"></div>
-  <div class="fg"><label class="fl">Due Date (optional)</label><input type="date" class="fi" id="ln-dd"></div>
-  <div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="ln-nt" placeholder="Additional details"></div>
-  <button class="btn btn-p" onclick="submitLoan()">Add Record</button>
-  <button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+  openModal(`<div class="modal-title">New Loan / Deposit Entry</div><div class="fg"><label class="fl">Type</label><select class="fi" id="ln-tp" onchange="lnTypeChanged()"><option value="deposit">🏦 Taking a Deposit</option><option value="loan_recv">💳 Loan Received</option><option value="loan_given">🤝 Loan Given</option></select></div><div id="ln-wallet-info" style="font-size:12px;background:var(--blue-d);border:1px solid rgba(77,159,255,.2);border-radius:10px;padding:9px 12px;margin-bottom:14px;color:var(--blue);">💡 Taking a Deposit: money will be <b>added</b> to selected wallet (optional)</div><div class="fg"><label class="fl">Person / Organization</label><input type="text" class="fi" id="ln-pr" placeholder="Name"></div><div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="ln-amt" placeholder="0.00" min="0"></div></div><div class="fg"><label class="fl">Wallet <span style="color:var(--text3);text-transform:none;letter-spacing:0;font-weight:500;">(optional)</span></label><select class="fi" id="ln-w"><option value="">-- No wallet --</option>${wOpts}</select></div><div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="ln-dt" value="${todayD()}"></div><div class="fg"><label class="fl">Due Date (optional)</label><input type="date" class="fi" id="ln-dd"></div><div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="ln-nt" placeholder="Additional details"></div><button class="btn btn-p" onclick="submitLoan()">Add Record</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
-
-function lnTypeChanged(){
-  const tp=document.getElementById('ln-tp').value;
-  const info=document.getElementById('ln-wallet-info');
-  const msgs={
-    deposit:'💡 Taking a Deposit: money will be <b>added</b> to selected wallet',
-    loan_recv:'💡 Loan Received: money will be <b>added</b> to selected wallet',
-    loan_given:'💡 Loan Given: money will be <b>deducted</b> from selected wallet',
-  };
-  if(info)info.innerHTML=msgs[tp]||'';
-}
-
+function lnTypeChanged(){const tp=document.getElementById('ln-tp').value;const info=document.getElementById('ln-wallet-info');const msgs={deposit:'💡 Taking a Deposit: money will be <b>added</b> to selected wallet (optional)',loan_recv:'💡 Loan Received: money will be <b>added</b> to selected wallet (optional)',loan_given:'💡 Loan Given: money will be <b>deducted</b> from selected wallet (optional)'};if(info)info.innerHTML=msgs[tp]||'';}
 function submitLoan(){
-  const tp=document.getElementById('ln-tp').value;
-  const pr=document.getElementById('ln-pr').value.trim();
-  const amt=parseFloat(document.getElementById('ln-amt').value);
-  const w=document.getElementById('ln-w').value; // may be empty string
-  const dt=document.getElementById('ln-dt').value;
-  const dd=document.getElementById('ln-dd').value;
-  const nt=document.getElementById('ln-nt').value.trim();
-  if(!pr)return alert('Enter a person name.');
-  if(!amt||amt<=0)return alert('Enter a valid amount.');
-  if(!dt)return alert('Select a date.');
-  // affect wallet only if one was selected
-  if(w){
-    const cfg=LOAN_TYPES[tp];
-    const wObj=S.wallets.find(x=>x.id===w);
-    if(wObj){if(cfg.walletDir==='in')wObj.balance+=amt;else wObj.balance-=amt;}
-  }
+  const tp=document.getElementById('ln-tp').value;const pr=document.getElementById('ln-pr').value.trim();
+  const amt=parseFloat(document.getElementById('ln-amt').value);const w=document.getElementById('ln-w').value;
+  const dt=document.getElementById('ln-dt').value;const dd=document.getElementById('ln-dd').value;const nt=document.getElementById('ln-nt').value.trim();
+  if(!pr)return alert('Enter a person name.');if(!amt||amt<=0)return alert('Enter a valid amount.');if(!dt)return alert('Select a date.');
+  if(w){const cfg=LOAN_TYPES[tp];const wObj=S.wallets.find(x=>x.id===w);if(wObj){if(cfg.walletDir==='in')wObj.balance+=amt;else wObj.balance-=amt;}}
   S.loans.push({id:uid(),type:tp,person:pr,amount:amt,wallet:w||'',date:dt,dueDate:dd,note:nt,payments:[],at:new Date().toISOString()});
   save();closeModal();renderMain();
 }
-
 function openAddLoanPayment(loanId){
   const loan=S.loans.find(l=>l.id===loanId);if(!loan)return;
-  const cfg=LOAN_TYPES[loan.type];
-  const remain=loanRemain(loan);
+  const cfg=LOAN_TYPES[loan.type];const remain=loanRemain(loan);
   const wOpts=S.wallets.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
-  openModal(`
-  <div class="modal-title">${cfg.childLabel}</div>
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
-    <div style="font-size:12px;color:var(--text3);">Original: <b style="color:var(--text);">${fmt(loan.amount)}</b> · <b style="color:var(--text);">${loan.person}</b></div>
-    <div style="font-size:12px;color:var(--text3);margin-top:4px;">Remaining: <b style="color:var(--red);">${fmt(remain)}</b></div>
-  </div>
-  <div class="fg"><label class="fl">Amount (৳)</label>
-    <div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="lp-amt" placeholder="${remain.toFixed(2)}" min="0" max="${remain}" value="${remain.toFixed(2)}"></div>
-  </div>
-  <div class="fg">
-    <label class="fl">Wallet <span style="color:var(--text3);text-transform:none;letter-spacing:0;font-weight:500;">(optional)</span></label>
-    <select class="fi" id="lp-w">
-      <option value="">-- No wallet --</option>
-      ${wOpts}
-    </select>
-  </div>
-  <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="lp-dt" value="${todayD()}"></div>
-  <div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="lp-nt" placeholder="Payment note"></div>
-  <button class="btn btn-p" onclick="submitLoanPayment('${loanId}')">Record Payment</button>
-  <button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+  openModal(`<div class="modal-title">${cfg.childLabel}</div><div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:16px;"><div style="font-size:12px;color:var(--text3);">Original: <b style="color:var(--text);">${fmt(loan.amount)}</b> · <b style="color:var(--text);">${loan.person}</b></div><div style="font-size:12px;color:var(--text3);margin-top:4px;">Remaining: <b style="color:var(--red);">${fmt(remain)}</b></div></div><div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="lp-amt" placeholder="${remain.toFixed(2)}" min="0" max="${remain}" value="${remain.toFixed(2)}"></div></div><div class="fg"><label class="fl">Wallet <span style="color:var(--text3);text-transform:none;letter-spacing:0;font-weight:500;">(optional)</span></label><select class="fi" id="lp-w"><option value="">-- No wallet --</option>${wOpts}</select></div><div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="lp-dt" value="${todayD()}"></div><div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="lp-nt" placeholder="Payment note"></div><button class="btn btn-p" onclick="submitLoanPayment('${loanId}')">Record Payment</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
-
 function submitLoanPayment(loanId){
   const loan=S.loans.find(l=>l.id===loanId);if(!loan)return;
-  const amt=parseFloat(document.getElementById('lp-amt').value);
-  const w=document.getElementById('lp-w').value; // may be empty
-  const dt=document.getElementById('lp-dt').value;
-  const nt=document.getElementById('lp-nt').value.trim();
+  const amt=parseFloat(document.getElementById('lp-amt').value);const w=document.getElementById('lp-w').value;
+  const dt=document.getElementById('lp-dt').value;const nt=document.getElementById('lp-nt').value.trim();
   const remain=loanRemain(loan);
-  if(!amt||amt<=0)return alert('Enter a valid amount.');
-  if(amt>remain+0.01)return alert(`Cannot exceed remaining amount of ${fmt(remain)}.`);
-  if(!dt)return alert('Select a date.');
-  // affect wallet only if selected
-  if(w){
-    const cfg=LOAN_TYPES[loan.type];
-    const wObj=S.wallets.find(x=>x.id===w);
-    if(wObj){if(cfg.childDir==='in')wObj.balance+=amt;else wObj.balance-=amt;}
-  }
+  if(!amt||amt<=0)return alert('Enter a valid amount.');if(amt>remain+0.01)return alert(`Cannot exceed remaining ${fmt(remain)}.`);if(!dt)return alert('Select a date.');
+  if(w){const cfg=LOAN_TYPES[loan.type];const wObj=S.wallets.find(x=>x.id===w);if(wObj){if(cfg.childDir==='in')wObj.balance+=amt;else wObj.balance-=amt;}}
   loan.payments.push({id:uid(),amount:amt,wallet:w||'',date:dt,note:nt});
   save();closeModal();renderMain();
 }
-
 function delLoanPayment(loanId,idx){
-  const loan=S.loans.find(l=>l.id===loanId);if(!loan)return;
-  const p=loan.payments[idx];if(!p)return;
-  if(!confirm('Remove this payment? Wallet balance will be reversed if a wallet was linked.'))return;
-  // only reverse if wallet was set
-  if(p.wallet){
-    const cfg=LOAN_TYPES[loan.type];
-    const wObj=S.wallets.find(x=>x.id===p.wallet);
-    if(wObj){if(cfg.childDir==='in')wObj.balance-=p.amount;else wObj.balance+=p.amount;}
-  }
+  const loan=S.loans.find(l=>l.id===loanId);if(!loan)return;const p=loan.payments[idx];if(!p)return;
+  if(!confirm('Remove this payment?'))return;
+  if(p.wallet){const cfg=LOAN_TYPES[loan.type];const wObj=S.wallets.find(x=>x.id===p.wallet);if(wObj){if(cfg.childDir==='in')wObj.balance-=p.amount;else wObj.balance+=p.amount;}}
   loan.payments.splice(idx,1);save();renderMain();
 }
+function settleFullLoan(loanId){const loan=S.loans.find(l=>l.id===loanId);if(!loan)return;if(loanRemain(loan)<=0)return;if(!confirm('Mark remaining amount as settled?'))return;openAddLoanPayment(loanId);}
+function delLoan(id){if(!confirm('Delete this loan record?'))return;S.loans=S.loans.filter(x=>x.id!==id);save();renderMain();}
 
-function settleFullLoan(loanId){
-  const loan=S.loans.find(l=>l.id===loanId);if(!loan)return;
-  const remain=loanRemain(loan);
-  if(remain<=0)return;
-  if(!confirm(`Mark full remaining amount of ${fmt(remain)} as settled? Select wallet on next step.`))return;
-  openAddLoanPayment(loanId);
-}
-
-function delLoan(id){
-  const l=S.loans.find(x=>x.id===id);if(!l)return;
-  if(!confirm('Delete this loan record? Wallet balances from its original entry and all payments will NOT be auto-reversed.'))return;
-  S.loans=S.loans.filter(x=>x.id!==id);save();renderMain();
-}
-
-// ---- SYNC MODAL ----
 function openSyncModal(){
-  openModal(`
-  <div class="modal-title">☁️ Cloud Sync Setup</div>
-  <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7;">
-    Uses <b>Firebase Realtime Database</b> (free) to sync across all your devices. One-time setup takes about 2 minutes.
-  </div>
-  <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px;font-size:12px;line-height:1.8;color:var(--text2);">
-    <b style="color:var(--text);font-size:13px;">How to set up (one-time):</b><br>
-    1. Go to <b style="color:var(--blue);">console.firebase.google.com</b><br>
-    2. Create a new project (any name)<br>
-    3. Build → Realtime Database → Create database<br>
-    4. Choose <b>"Start in test mode"</b> → Enable<br>
-    5. Copy the Database URL (looks like: <span style="color:var(--green);font-family:'Space Mono',monospace;font-size:11px;">https://myapp-abc.firebaseio.com</span>)<br>
-    6. Paste it below
-  </div>
-  <div class="fg">
-    <label class="fl">Firebase Database URL</label>
-    <input type="url" class="fi" id="sk-dburl" placeholder="https://ntransactions-default-rtdb.firebaseio.com/" value="${S.syncDbUrl||''}">
-  </div>
-  <div class="fg">
-    <label class="fl">Sync Path (unique name for your data)</label>
-    <input type="text" class="fi" id="sk-path" placeholder="e.g. username" value="${S.syncPath||''}">
-    <div style="font-size:11px;color:var(--text3);margin-top:6px;">Use the same path on all devices. Only letters, numbers, hyphens allowed.</div>
-  </div>
-  <button class="btn btn-p" onclick="applySyncKey()">💾 Save & Push to Cloud</button>
-  ${fbUrl()?`<button class="btn btn-s" onclick="manualPull()" style="margin-top:8px;">⬇ Pull Latest from Cloud</button>`:''}
-  <button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>
-  ${S.lastSync?`<div style="font-size:11px;color:var(--text3);text-align:center;margin-top:12px;">Last synced: ${new Date(S.lastSync).toLocaleString()}</div>`:''}
-  <div style="margin-top:14px;padding:10px 12px;background:var(--amber-d);border:1px solid rgba(255,176,32,.2);border-radius:10px;font-size:11px;color:var(--amber);">
-    ⚠ Keep your Sync Path private. Anyone who knows both the DB URL and path can access your data.
-  </div>`);
+  openModal(`<div class="modal-title">☁️ Cloud Sync Setup</div><div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7;">Uses <b>Firebase Realtime Database</b> (free) to sync across all your devices.</div><div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px;font-size:12px;line-height:1.8;color:var(--text2);"><b style="color:var(--text);font-size:13px;">How to set up:</b><br>1. Go to <b style="color:var(--blue);">console.firebase.google.com</b><br>2. Create project → Build → Realtime Database<br>3. Choose <b>"Start in test mode"</b> → Enable<br>4. Copy the Database URL → Paste below</div><div class="fg"><label class="fl">Firebase Database URL</label><input type="url" class="fi" id="sk-dburl" placeholder="https://myapp-default-rtdb.firebaseio.com" value="${S.syncDbUrl||''}"></div><div class="fg"><label class="fl">Sync Path (unique name)</label><input type="text" class="fi" id="sk-path" placeholder="e.g. nasimul-main" value="${S.syncPath||''}"><div style="font-size:11px;color:var(--text3);margin-top:6px;">Use the same path on all devices.</div></div><button class="btn btn-p" onclick="applySyncKey()">💾 Save & Push to Cloud</button>${fbUrl()?`<button class="btn btn-s" onclick="manualPull()" style="margin-top:8px;">⬇ Pull Latest from Cloud</button>`:''}<button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>${S.lastSync?`<div style="font-size:11px;color:var(--text3);text-align:center;margin-top:12px;">Last synced: ${new Date(S.lastSync).toLocaleString()}</div>`:''}<div style="margin-top:14px;padding:10px 12px;background:var(--amber-d);border:1px solid rgba(255,176,32,.2);border-radius:10px;font-size:11px;color:var(--amber);">⚠ Keep your Sync Path private.</div>`);
 }
-
 async function applySyncKey(){
   const dburl=(document.getElementById('sk-dburl').value||'').trim().replace(/\/+$/,'');
   const path=(document.getElementById('sk-path').value||'').trim().replace(/[^a-zA-Z0-9_-]/g,'');
-  if(!dburl||!dburl.startsWith('https://'))return alert('Enter a valid Firebase Database URL (must start with https://).');
+  if(!dburl||!dburl.startsWith('https://'))return alert('Enter a valid Firebase Database URL.');
   if(!path||path.length<3)return alert('Enter a sync path with at least 3 characters.');
-  S.syncDbUrl=dburl;S.syncPath=path;saveLocal();
-  closeModal();
-  setSyncDot('busy');
-  await pushSync();
-  renderMain();
-  alert('✅ Sync configured! Now set the same Database URL and Path on your other device, then tap "Pull Latest from Cloud" on that device.');
+  S.syncDbUrl=dburl;S.syncPath=path;saveLocal();closeModal();setSyncDot('busy');await pushSync();renderMain();
+  alert('✅ Sync configured! Use the same URL + Path on your other device, then tap "Pull Latest from Cloud".');
 }
+async function manualPull(){closeModal();setSyncDot('busy');await pullSync();alert('⬇ Pull complete.');}
 
-async function manualPull(){
-  closeModal();
-  setSyncDot('busy');
-  await pullSync();
-  alert('⬇ Pull complete. Your data is now up to date.');
-}
-
-// ---- BUDGET TAB SWITCH ----
-function showBgtTab(tab){
-  const m=document.getElementById('bgt-monthly');
-  const y=document.getElementById('bgt-yearly');
-  const tm=document.getElementById('btab-m');
-  const ty=document.getElementById('btab-y');
-  if(!m||!y)return;
-  if(tab==='monthly'){
-    m.style.display='';y.style.display='none';
-    if(tm){tm.classList.add('active');}if(ty){ty.classList.remove('active');}
-  }else{
-    m.style.display='none';y.style.display='';
-    if(ty){ty.classList.add('active');}if(tm){tm.classList.remove('active');}
-  }
-}
-
-// ---- EXPORT TO XLSX ----
 function exportXLSX(){
   if(!S.transactions.length)return alert('No transactions to export.');
-  const rows=S.transactions
-    .sort((a,b)=>b.date.localeCompare(a.date))
-    .map(t=>{
-      let category='',type=t.type;
-      if(t.type==='expense')category=getCat('expense',t.category).label;
-      else if(t.type==='income')category=getCat('income',t.category).label;
-      else category='Transfer';
-      const fromWallet=getWlt(t.wallet).name;
-      const toWallet=t.toWallet?getWlt(t.toWallet).name:'';
-      return{
-        'Date':fmtD(t.date),
-        'Type':type.charAt(0).toUpperCase()+type.slice(1),
-        'Category':category,
-        'Amount (৳)':t.amount,
-        'Wallet':fromWallet,
-        'To Wallet':toWallet,
-        'Note':t.note||'',
-      };
-    });
-  const wb=XLSX.utils.book_new();
-  const ws=XLSX.utils.json_to_sheet(rows);
-  // column widths
+  const rows=S.transactions.sort((a,b)=>b.date.localeCompare(a.date)).map(t=>{
+    let category=t.type==='expense'?getCat('expense',t.category).label:t.type==='income'?getCat('income',t.category).label:'Transfer';
+    return{'Date':fmtD(t.date),'Type':t.type.charAt(0).toUpperCase()+t.type.slice(1),'Category':category,'Amount (৳)':t.amount,'Wallet':getWlt(t.wallet).name,'To Wallet':t.toWallet?getWlt(t.toWallet).name:'','Note':t.note||''};
+  });
+  const wb=XLSX.utils.book_new();const ws=XLSX.utils.json_to_sheet(rows);
   ws['!cols']=[{wch:14},{wch:12},{wch:24},{wch:14},{wch:16},{wch:16},{wch:28}];
   XLSX.utils.book_append_sheet(wb,ws,'Transactions');
-  // also add loans sheet
   if(S.loans.length){
-    const lrows=S.loans.map(l=>{
-      const cfg=LOAN_TYPES[l.type];
-      const paid=loanPaid(l);
-      return{
-        'Date':fmtD(l.date),
-        'Type':cfg.label,
-        'Person':l.person,
-        'Original (৳)':l.amount,
-        'Paid (৳)':paid,
-        'Remaining (৳)':loanRemain(l),
-        'Wallet':getWlt(l.wallet).name,
-        'Due Date':l.dueDate?fmtD(l.dueDate):'',
-        'Note':l.note||'',
-        'Status':loanRemain(l)<=0?'Settled':'Pending',
-      };
-    });
-    const ws2=XLSX.utils.json_to_sheet(lrows);
-    ws2['!cols']=[{wch:14},{wch:18},{wch:16},{wch:14},{wch:12},{wch:14},{wch:16},{wch:14},{wch:24},{wch:10}];
+    const lrows=S.loans.map(l=>{const cfg=LOAN_TYPES[l.type];const paid=loanPaid(l);return{'Date':fmtD(l.date),'Type':cfg.label,'Person':l.person,'Original (৳)':l.amount,'Paid (৳)':paid,'Remaining (৳)':loanRemain(l),'Wallet':l.wallet?getWlt(l.wallet).name:'','Due Date':l.dueDate?fmtD(l.dueDate):'','Note':l.note||'','Status':loanRemain(l)<=0?'Settled':'Pending'};});
+    const ws2=XLSX.utils.json_to_sheet(lrows);ws2['!cols']=[{wch:14},{wch:18},{wch:16},{wch:14},{wch:12},{wch:14},{wch:16},{wch:14},{wch:24},{wch:10}];
     XLSX.utils.book_append_sheet(wb,ws2,'Loans');
   }
-  const fname=`nTransactions_${S.month}.xlsx`;
-  XLSX.writeFile(wb,fname);
+  XLSX.writeFile(wb,`nTransactions_${S.month}.xlsx`);
 }
 
 function changeMonth(d){const[y,m]=S.month.split('-').map(Number);const nd=new Date(y,m-1+d,1);S.month=nd.toISOString().slice(0,7);save();renderMain();}
-function openMonthPicker(){
-  openModal(`
-  <div class="modal-title">Select Month</div>
-  <div class="fg"><input type="month" class="fi" id="mp-val" value="${S.month}"></div>
-  <button class="btn btn-p" onclick="applyMonth()">Apply</button>
-  <button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
-}
+function openMonthPicker(){openModal(`<div class="modal-title">Select Month</div><div class="fg"><input type="month" class="fi" id="mp-val" value="${S.month}"></div><button class="btn btn-p" onclick="applyMonth()">Apply</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);}
 function applyMonth(){const v=document.getElementById('mp-val').value;if(v){S.month=v;save();closeModal();renderMain();}}
 
 // ============================================================
