@@ -348,12 +348,12 @@ const DEFAULT_EXP_CATS=[
   {id:'education',label:'Education',icon:'📚'},{id:'entertainment',label:'Entertainment',icon:'🎮'},
   {id:'transportation',label:'Transportation',icon:'🚌'},{id:'food',label:'Food & Drinks',icon:'🍔'},
   {id:'health',label:'Health & Care',icon:'💊'},{id:'accommodation',label:'Accommodation',icon:'🏠'},
-  {id:'mobile',label:'Mobile Recharge',icon:'📱'},{id:'misc',label:'Miscellaneous Expenses',icon:'📦'},
-  {id:'clothing',label:'Clothing & Accessories',icon:'👕'},{id:'tech',label:'Technology & Electronics',icon:'💻'},
-  {id:'travel',label:'Travel',icon:'✈️'},{id:'donation',label:'Donation',icon:'❤️'},
+  {id:'mobile',label:'Mobile Recharge',icon:'📱'},{id:'misc',label:'Miscellaneous',icon:'📦'},
+  {id:'clothing',label:'Clothing & Accessories',icon:'👕'},{id:'tech',label:'Technology',icon:'💻'},
+  {id:'travel',label:'Travel',icon:'✈️'},{id:'donation',label:'Donation',icon:'🤲'},
 ];
 const DEFAULT_INC_CATS=[
-  {id:'family',label:'Parents & Family',icon:'👨‍👩‍👧'},{id:'bonus',label:'Bonus & Cash Back',icon:'🎁'},
+  {id:'family',label:'Parents / Family',icon:'👨‍👩‍👧'},{id:'bonus',label:'Bonus / Cash Back',icon:'🎁'},
   {id:'relatives',label:'Relatives',icon:'👥'},{id:'other',label:'Other Income',icon:'💰'},
 ];
 const LOAN_TYPES={
@@ -365,6 +365,9 @@ const WLT_TYPES=[
   {id:'bank',label:'Bank Account',icon:'🏦'},{id:'drawer',label:'Drawer',icon:'🗄️'},
   {id:'wallet',label:'Wallet',icon:'👛'},{id:'cash',label:'Cash',icon:'💵'},{id:'mfs',label:'MFS',icon:'📱'},
 ];
+// Dropdown options (no emojis)
+function loanTypeOpts(selVal){return Object.entries(LOAN_TYPES).map(([k,v])=>`<option value="${k}" ${k===selVal?'selected':''}>${v.label}</option>`).join('');}
+function wltTypeOpts(selVal){return WLT_TYPES.map(t=>`<option value="${t.id}" ${t.id===selVal?'selected':''}>${t.label}</option>`).join('');}
 const COLORS=['#0ce97f','#4d9fff','#ff3d5a','#ffb020','#9d6fff','#ff6b35','#00d4ff','#f472b6'];
 
 // ============================================================
@@ -382,7 +385,6 @@ const ICON_PATHS={
   clothing:'<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>',
   tech:'<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="2" y1="20" x2="22" y2="20"/>',
   travel:'<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19 4c-1 0-2 .5-2.5 1L13 9 4.8 6.2c-.5-.2-1.1 0-1.4.5l-.5.9c-.3.5-.1 1.1.3 1.4L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.9.6 1.4.3l.9-.5c.5-.3.7-.9.5-1.4"/>',
-  donation:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
   family:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
   bonus:'<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>',
   relatives:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
@@ -403,11 +405,12 @@ const ICON_PATHS={
   install:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
   edit:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',
   trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>',
-  barChart:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
   empty_tx:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
   empty_search:'<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
   empty_loan:'<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="7" y1="15" x2="17" y2="15"/>',
   empty_budget:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+  budget_icon:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+  donation:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/><path d="M12 8v8M8 12h8" stroke-linecap="round"/>',
 };
 const TRASH_SVG=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ff3d5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
 const EDIT_SVG=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
@@ -426,7 +429,7 @@ function loanIco(tid,size=18){return ico(LOAN_ICON_MAP[tid]||'loan_recv',size);}
 // ============================================================
 let S={transactions:[],wallets:[],budgets:[],loans:[],customExpCats:[],customIncCats:[],view:'dashboard',month:todayYM(),syncDbUrl:'',syncPath:'',lastSync:null};
 let txF='all',txQ='',txDuration='all',loanF='all',txType='expense',editWltId='',selColor=COLORS[0];
-let syncTimeout=null,balHiddenLarge=false,balHiddenNet=true;
+let syncTimeout=null,balHidden=false,netHidden=true;
 
 function todayYM(){return new Date().toISOString().slice(0,7);}
 function todayD(){return new Date().toISOString().slice(0,10);}
@@ -477,6 +480,7 @@ setInterval(()=>{if(fbUrl())pullSync();},45000);
 // ============================================================
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function fmt(n){return'৳'+Math.abs(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtInt(n){return'৳'+Math.abs(Math.round(n||0)).toLocaleString('en-US');}
 function fmtD(d){if(!d)return'';return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
 function fmtMY(ym){if(!ym)return'';const[y,m]=ym.split('-');return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]+' '+y;}
 function getCat(type,id){return(type==='expense'?getExpCats():getIncCats()).find(c=>c.id===id)||{label:id||'?',icon:'📋'};}
@@ -500,8 +504,10 @@ function catIncomeAll(m){
   const map={};mTxs(m).filter(t=>t.type==='income').forEach(t=>{map[t.category]=(map[t.category]||0)+t.amount;});
   return Object.entries(map).map(([id,amount])=>({...getCat('income',id),id,amount})).sort((a,b)=>b.amount-a.amount);
 }
+// Loan helpers - supports extraEntries for adding multiple deposits to one card
+function loanTotal(l){return l.amount+(l.extraEntries||[]).reduce((s,e)=>s+e.amount,0);}
 function loanPaid(l){return(l.payments||[]).reduce((s,p)=>s+p.amount,0);}
-function loanRemain(l){return l.amount-loanPaid(l);}
+function loanRemain(l){return loanTotal(l)-loanPaid(l);}
 function curYear(){return S.month.slice(0,4);}
 function getSavingsBgt(period,key){
   if(period==='yearly')return S.budgets.find(b=>b.category==='savings'&&b.year===key&&b.period==='yearly');
@@ -559,29 +565,24 @@ function rDash(){
     <div class="bal-card">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2px;">
         <div class="bal-label">Yearly Balance · ${yr}${ys.sav>0?' (after savings)':''}</div>
-        <button onclick="toggleBalLarge()" style="background:rgba(255,255,255,.07);border:none;border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--text2);display:flex;align-items:center;transition:all .2s;" title="${balHiddenLarge?'Show':'Hide'} large balance">
-          ${balHiddenLarge?ico('eye',15):ico('eye_off',15)}
+        <button onclick="toggleBal()" style="background:rgba(255,255,255,.07);border:none;border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--text2);display:flex;align-items:center;transition:all .2s;" title="${balHidden?'Show':'Hide'} balance">
+          ${balHidden?ico('eye',15):ico('eye_off',15)}
         </button>
       </div>
-      <div class="bal-amount">${balHiddenLarge?'••••••':fmt(ys.net)}</div>
+      <div class="bal-amount">${balHidden?'••••••':fmt(ys.net)}</div>
       <div class="bal-sub">${ys.sav>0?`Income − Expense − Savings target`:`Yearly Income − Expense`}</div>
       <div class="bal-row">
         <div class="bal-stat">
           <div class="bsl">Yr Income</div>
-          <div class="bsv c-green" style="font-size:12px;">${fmt(ys.inc)}</div>
+          <div class="bsv c-green" style="font-size:12px;">${fmtInt(ys.inc)}</div>
         </div>
         <div class="bal-stat">
           <div class="bsl">Yr Expense</div>
-          <div class="bsv c-red" style="font-size:12px;">${fmt(ys.exp)}</div>
+          <div class="bsv c-red" style="font-size:12px;">${fmtInt(ys.exp)}</div>
         </div>
         <div class="bal-stat">
-          <div class="bsl" style="display:flex;align-items:center;justify-content:space-between;">
-            Net
-            <button onclick="toggleBalNet()" style="background:none;border:none;color:var(--text2);display:inline-flex;align-items:center;cursor:pointer;margin-left:4px;" title="${balHiddenNet?'Show':'Hide'} net">
-              ${balHiddenNet?ico('eye',12):ico('eye_off',12)}
-            </button>
-          </div>
-          <div class="bsv" style="font-size:12px;color:${ys.simpleNet>=0?'var(--green)':'var(--red)'};">${balHiddenNet?'••••••':fmt(ys.simpleNet)}</div>
+          <div class="bsl" style="display:flex;align-items:center;gap:4px;">Net<button onclick="toggleNet()" style="background:none;border:none;padding:0;cursor:pointer;color:var(--text3);display:flex;align-items:center;">${netHidden?ico('eye',10):ico('eye_off',10)}</button></div>
+          <div class="bsv" style="font-size:12px;color:${ys.simpleNet>=0?'var(--green)':'var(--red)'};">${netHidden?'•••':fmtInt(ys.simpleNet)}</div>
         </div>
       </div>
     </div>
@@ -592,20 +593,20 @@ function rDash(){
       <div style="display:flex;gap:10px;">
         <div style="flex:1;background:var(--green-d);border-radius:10px;padding:10px 12px;">
           <div style="font-size:10px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Income</div>
-          <div style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--green);">${fmt(ms.inc)}</div>
+          <div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--green);">${fmtInt(ms.inc)}</div>
         </div>
         <div style="flex:1;background:var(--red-d);border-radius:10px;padding:10px 12px;">
           <div style="font-size:10px;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Expense</div>
-          <div style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--red);">${fmt(ms.exp)}</div>
+          <div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--red);">${fmtInt(ms.exp)}</div>
         </div>
         <div style="flex:1;background:rgba(255,255,255,.04);border-radius:10px;padding:10px 12px;">
           <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Net</div>
-          <div style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:${ms.net>=0?'var(--green)':'var(--red)'};">${fmt(ms.net)}</div>
+          <div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:${ms.net>=0?'var(--green)':'var(--red)'};">${fmtInt(ms.net)}</div>
         </div>
       </div>
       ${mSavBgt?`<div style="margin-top:10px;border-top:1px solid var(--borderl);padding-top:10px;">
         <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px;">
-          <span>Monthly Savings Target</span><span style="color:var(--green);font-weight:700;">${fmt(mSavBgt.amount)}</span>
+          <span>Monthly Savings Target</span><span style="color:var(--green);font-weight:700;">${fmtInt(mSavBgt.amount)}</span>
         </div>
         <div class="prog"><div class="prog-fill" style="width:${Math.min(100,(ms.net/mSavBgt.amount)*100)}%;background:${ms.net>=mSavBgt.amount?'var(--green)':'var(--amber)'};"></div></div>
       </div>`:''}
@@ -805,6 +806,7 @@ function rBudget(){
       <div style="font-size:12px;margin-top:7px;font-weight:700;color:${col};">${pct>=100?'⚠ Exceeded!':pct>80?'⚠ Approaching limit':'✓ '+fmt(bgt.amount-spent)+' remaining'}</div>
     </div>`;
   }
+  
   function emptyBudgetCard(label,gradientColor,iconColor,onClick){
     return`<div style="background:linear-gradient(135deg,#0d1420,#0a1422);border:1px solid rgba(${iconColor==='blue'?'77,159,255':iconColor==='amber'?'255,176,32':'12,233,127'},.14);border-radius:18px;padding:18px;margin-bottom:12px;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
@@ -815,6 +817,7 @@ function rBudget(){
       <button class="sm-btn" onclick="${onClick}" style="width:100%;">Set →</button>
     </div>`;
   }
+  
   function savCard(bgt,net,label,ac,editFn){
     const pct=Math.max(0,Math.min(100,(net/bgt.amount)*100));const col=net>=bgt.amount?'var(--green)':pct>50?'var(--amber)':'var(--red)';
     return`<div style="background:linear-gradient(135deg,#0a1a10,#081410);border:1px solid rgba(${ac},.14);border-radius:18px;padding:18px;margin-bottom:12px;">
@@ -885,101 +888,105 @@ function rBudget(){
     </div>
   </div>`;
 }
-
+  
 // ============================================================
 // LOANS
 // ============================================================
 function rLoans(){
   const sectionConfig={deposit:{title:'Deposits',acol:'blue'},loan_recv:{title:'Loans Received',acol:'amber'},loan_given:{title:'Loans Given',acol:'green'}};
   let loans=[...S.loans].sort((a,b)=>b.date.localeCompare(a.date));
-  
-  // Group loans by person + type
-  const grouped = {};
-  loans.forEach(l => {
-    const key = l.type + '_' + l.person;
-    if (!grouped[key]) {
-      grouped[key] = {
-        type: l.type,
-        person: l.person,
-        loans: [],
-        totalAmount: 0,
-        totalPaid: 0
-      };
-    }
-    grouped[key].loans.push(l);
-    grouped[key].totalAmount += l.amount;
-    grouped[key].totalPaid += loanPaid(l);
-  });
-  
-  const groupedList = Object.values(grouped).sort((a, b) => b.loans[0].date.localeCompare(a.loans[0].date));
-  
-  if(loanF!=='all') {
-    // Filter grouped list by type
-    const filtered = groupedList.filter(g => g.type === loanF);
-    groupedList.length = 0;
-    groupedList.push(...filtered);
-  }
-  
+  if(loanF!=='all')loans=loans.filter(l=>l.type===loanF);
   const iOwe=S.loans.filter(l=>l.type==='loan_recv'&&loanRemain(l)>0).reduce((s,l)=>s+loanRemain(l),0);
   const owesMe=S.loans.filter(l=>l.type==='loan_given'&&loanRemain(l)>0).reduce((s,l)=>s+loanRemain(l),0);
   const depPend=S.loans.filter(l=>l.type==='deposit'&&loanRemain(l)>0).reduce((s,l)=>s+loanRemain(l),0);
 
-  function lCardGroup(g){
-    const cfg=LOAN_TYPES[g.type];const sc=sectionConfig[g.type];
-    const remain = g.totalAmount - g.totalPaid;
-    const pct = Math.min(100, (g.totalPaid/g.totalAmount)*100);
-    const pcol = remain<=0?'var(--green)':pct>50?'var(--amber)':'var(--red)';
-    const lIconCol=g.type==='deposit'?'#4d9fff':g.type==='loan_recv'?'#ffb020':'#9d6fff';
-    
-    return`<div class="loan-card" style="margin-bottom:15px;">
-      <div class="loan-hdr">
-        <div style="flex:1;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-            <div style="width:42px;height:42px;border-radius:12px;background:${lIconCol}22;display:flex;align-items:center;justify-content:center;color:${lIconCol};flex-shrink:0;">${loanIco(g.type,20)}</div>
-            <div>
-              <div class="loan-person">${g.person}</div>
-              <span class="loan-type-badge" style="background:var(--${sc.acol}-d);color:var(--${sc.acol});">${cfg.label}</span>
-            </div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <div><span style="font-size:12px;color:var(--text3);">Total Amount</span><div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--${sc.acol});">${fmt(g.totalAmount)}</div></div>
-            <div style="text-align:right;"><span style="font-size:12px;color:var(--text3);">Paid</span><div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--green);">${fmt(g.totalPaid)}</div></div>
-          </div>
-          <div class="loan-prog-wrap"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px;"><span>Progress</span><span style="color:${pcol};font-weight:700;">${pct.toFixed(0)}%</span></div><div class="prog" style="height:8px;"><div class="prog-fill" style="width:${pct}%;background:${pcol};"></div></div></div>
-        </div>
-      </div>
-      
-      <!-- Individual loans list -->
-      <div style="border-top:1px solid var(--borderl);margin-top:10px;padding-top:10px;">
-        <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;">Transactions</div>
-        ${g.loans.map(l => {
-          const lRemain = loanRemain(l);
-          return`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <div><span style="font-size:11px;color:var(--text3);">${fmtD(l.date)}</span><div style="font-size:12px;font-weight:700;margin-top:2px;">${fmt(l.amount)}</div></div>
-              <div><span style="font-size:11px;color:var(--text3);">Remaining</span><div style="font-size:12px;font-weight:700;color:${lRemain<=0?'var(--green)':'var(--red)'};">${fmt(lRemain)}</div></div>
-              <div style="display:flex;gap:5px;">
-                ${lRemain>0?`<button class="sm-btn-g" style="padding:4px 8px;font-size:10px;" onclick="openAddLoanPayment('${l.id}')">+ Pay</button>`:''}
-                <button class="del-btn" style="width:22px;height:22px;" onclick="delLoan('${l.id}')">${TRASH_SVG}</button>
-              </div>
-            </div>
-            ${l.note?`<div style="font-size:10px;color:var(--text3);margin-top:4px;">${l.note}</div>`:''}
-          </div>`;
-        }).join('')}
-      </div>
-      
-      <div style="margin-top:12px;">
-        <button class="sm-btn-b" onclick="openAddLoanToPerson('${g.type}','${g.person}')" style="width:100%;">+ Add to ${g.person}</button>
-      </div>
-    </div>`;
+  function extraEntriesHTML(l,sc){
+    const extras=l.extraEntries||[];
+    if(!extras.length)return'';
+    const rows=extras.map(function(e,i){
+      const wName=e.wallet?(' · '+WAL_SVG+' '+getWlt(e.wallet).name):'';
+      const note=e.note?(' · '+e.note):'';
+      return '<div class="loan-pay-item">'
+        +'<span style="display:flex;align-items:center;gap:4px;">'+CAL_SVG+' '+fmtD(e.date)+note+wName+'</span>'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+        +'<span style="font-family:\'Space Mono\',monospace;font-weight:700;color:var(--'+sc.acol+');">+'+fmt(e.amount)+'</span>'
+        +'<button class="del-btn" style="width:22px;height:22px;font-size:11px;" onclick="delLoanSubEntry(\''+l.id+'\','+i+')">×</button>'
+        +'</div></div>';
+    }).join('');
+    return '<div style="border-top:1px solid var(--borderl);margin-top:10px;padding-top:10px;">'
+      +'<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:6px;">Additional Entries</div>'
+      +rows
+      +'<div style="font-size:12px;font-weight:700;color:var(--text2);margin-top:8px;padding-top:8px;border-top:1px solid var(--borderl);display:flex;justify-content:space-between;">'
+      +'<span>Total</span><span style="font-family:\'Space Mono\',monospace;color:var(--'+sc.acol+');">'+fmt(loanTotal(l))+'</span>'
+      +'</div></div>';
   }
 
-  const sections = ['deposit','loan_recv','loan_given'].map(type=>{
+  function lCard(l){
+    const cfg=LOAN_TYPES[l.type];const sc=sectionConfig[l.type];
+    const total=loanTotal(l);
+    const paid=loanPaid(l);const remain=loanRemain(l);
+    const extras=l.extraEntries||[];
+    const pct=total>0?Math.min(100,(paid/total)*100):0;
+    const pcol=remain<=0?'var(--green)':pct>50?'var(--amber)':'var(--red)';
+    const lIconCol=l.type==='deposit'?'#4d9fff':l.type==='loan_recv'?'#ffb020':'#9d6fff';
+    const extraHTML=extraEntriesHTML(l,sc);
+    const payHistHTML=(l.payments&&l.payments.length)
+      ?'<div class="loan-payments"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:7px;">Payment History</div>'
+        +l.payments.map(function(p,i){
+          const wName=p.wallet?(' · '+WAL_SVG+' '+getWlt(p.wallet).name):'';
+          const note=p.note?(' · '+p.note):'';
+          return '<div class="loan-pay-item">'
+            +'<span style="display:flex;align-items:center;gap:4px;">'+CAL_SVG+' '+fmtD(p.date)+note+wName+'</span>'
+            +'<div style="display:flex;align-items:center;gap:8px;">'
+            +'<span style="font-family:\'Space Mono\',monospace;font-weight:700;color:var(--green);">'+fmt(p.amount)+'</span>'
+            +'<button class="del-btn" style="width:22px;height:22px;font-size:11px;" onclick="delLoanPayment(\''+l.id+'\','+i+')">×</button>'
+            +'</div></div>';
+        }).join('')
+        +'</div>'
+      :'';
+    return`<div class="loan-card"><div class="loan-hdr"><div><div style="display:flex;align-items:center;gap:10px;"><div style="width:42px;height:42px;border-radius:12px;background:${lIconCol}22;display:flex;align-items:center;justify-content:center;color:${lIconCol};flex-shrink:0;">${loanIco(l.type,20)}</div><div><div class="loan-person">${l.person}</div><span class="loan-type-badge" style="background:var(--${sc.acol}-d);color:var(--${sc.acol});">${cfg.label}</span></div></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:9px;display:flex;align-items:center;gap:5px;">${CAL_SVG} ${fmtD(l.date)}${l.dueDate?' · Due: '+fmtD(l.dueDate):''}</div>
+      ${l.note?'<div style="font-size:11px;color:var(--text3);margin-top:3px;">'+l.note+'</div>':''}
+      <div style="font-size:11px;color:var(--text3);margin-top:3px;display:flex;align-items:center;gap:5px;">${WAL_SVG} ${l.wallet?getWlt(l.wallet).name:'No wallet linked'}</div></div>
+    <div style="text-align:right;flex-shrink:0;">
+      <div style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--${sc.acol});">${fmt(l.amount)}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:2px;">${extras.length?'Initial':'Amount'}</div>
+      ${extras.length?'<div style="font-family:\'Space Mono\',monospace;font-size:15px;font-weight:700;color:var(--'+sc.acol+');margin-top:4px;">'+fmt(total)+'</div><div style="font-size:10px;color:var(--text3);">Total</div>':''}
+      ${remain>0?'<div style="font-family:\'Space Mono\',monospace;font-size:14px;font-weight:700;color:var(--red);margin-top:6px;">'+fmt(remain)+'</div><div style="font-size:10px;color:var(--text3);">Remaining</div>':'<div style="font-size:12px;color:var(--green);font-weight:700;margin-top:6px;display:flex;align-items:center;gap:4px;justify-content:flex-end;">'+ico('check',13,'#0ce97f')+' Settled</div>'}
+    </div></div>
+    ${extraHTML}
+    <div class="loan-prog-wrap"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px;"><span>Paid ${fmt(paid)} of ${fmt(total)}</span><span style="color:${pcol};font-weight:700;">${pct.toFixed(0)}%</span></div><div class="prog" style="height:8px;"><div class="prog-fill" style="width:${pct}%;background:${pcol};"></div></div></div>
+    ${payHistHTML}
+    <div class="loan-actions">
+      ${remain>0?'<button class="sm-btn-g" onclick="openAddLoanPayment(\''+l.id+'\')">+ '+cfg.childLabel+'</button>':''}
+      ${remain>0?'<button class="sm-btn" onclick="settleFullLoan(\''+l.id+'\')">Fully Settle</button>':''}
+      <button class="sm-btn-b" onclick="openAddSubEntry('${l.id}')">+ Add More</button>
+      <button class="del-btn" style="margin-left:auto;" onclick="delLoan('${l.id}')">${TRASH_SVG}</button>
+    </div></div>`;
+  }
+
+  // Person-centric view: group all entries by person first, then type-by-type within each person
+  function personCentricHTML(){
+    const personMap={};
+    loans.forEach(l=>{if(!personMap[l.person])personMap[l.person]=[];personMap[l.person].push(l);});
+    return Object.entries(personMap).map(([person,pLoans])=>{
+      const pendingAmt=pLoans.reduce((s,l)=>s+loanRemain(l),0);
+      return`<div style="margin-bottom:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:15px;font-weight:800;">${person}</div>
+          <div style="font-size:12px;font-family:'Space Mono',monospace;color:${pendingAmt>0?'var(--amber)':'var(--green)'};font-weight:700;">${pendingAmt>0?fmt(pendingAmt)+' pending':'All settled'}</div>
+        </div>
+        ${pLoans.map(l=>lCard(l)).join('')}
+      </div>`;
+    }).join('');
+  }
+
+  // Type-by-type view (used when filter is active)
+  const sections=['deposit','loan_recv','loan_given'].map(type=>{
     if(loanF!=='all'&&loanF!==type)return'';
-    const sc=sectionConfig[type]; 
-    const gl = groupedList.filter(g => g.type === type);
-    if(!gl.length)return'';
-    return`<div class="loan-section-hdr"><div class="loan-section-line"></div><div class="loan-section-title">${sc.title}</div><div class="loan-section-line"></div></div>${gl.map(g=>lCardGroup(g)).join('')}`;
+    const sc=sectionConfig[type];const tl=loans.filter(l=>l.type===type);
+    if(!tl.length)return'';
+    return`<div class="loan-section-hdr"><div class="loan-section-line"></div><div class="loan-section-title">${sc.title}</div><div class="loan-section-line"></div></div>${tl.map(l=>lCard(l)).join('')}`;
   }).join('');
 
   return`
@@ -1000,7 +1007,11 @@ function rLoans(){
     </div>
     <div class="filter-bar"><button class="fc ${loanF==='all'?'active':''}" onclick="setLoanF('all')">All</button><button class="fc ${loanF==='deposit'?'active':''}" onclick="setLoanF('deposit')">Deposits</button><button class="fc ${loanF==='loan_recv'?'active':''}" onclick="setLoanF('loan_recv')">Received</button><button class="fc ${loanF==='loan_given'?'active':''}" onclick="setLoanF('loan_given')">Given</button></div>
     <button class="btn btn-s" onclick="openAddLoan()" style="margin-bottom:14px;">+ New Entry</button>
-    ${S.loans.length===0?`<div class="empty"><div style="display:flex;justify-content:center;margin-bottom:12px;opacity:.4;">${ico('empty_loan',46)}</div><div class="empty-t">No records yet</div><div class="empty-s">Track deposits, loans received & given</div></div>`:(sections||'')}
+    ${S.loans.length===0
+      ?`<div class="empty"><div style="display:flex;justify-content:center;margin-bottom:12px;opacity:.4;">${ico('empty_loan',46)}</div><div class="empty-t">No records yet</div><div class="empty-s">Track deposits, loans received & given</div></div>`
+      :loanF==='all'
+        ?(personCentricHTML()||'')
+        :(sections||'')}
   </div>`;
 }
 function setLoanF(f){loanF=f;renderMain();}
@@ -1011,8 +1022,9 @@ function setLoanF(f){loanF=f;renderMain();}
 function openModal(html){document.getElementById('mc').innerHTML=html;document.getElementById('modal-overlay').classList.add('open');}
 function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
 function handleOvClick(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
-function toggleBalLarge(){balHiddenLarge=!balHiddenLarge;renderMain();}
-function toggleBalNet(){balHiddenNet=!balHiddenNet;renderMain();}
+function toggleBal(){balHidden=!balHidden;renderMain();}
+function toggleNet(){netHidden=!netHidden;renderMain();}
+function toggleNet(){netHidden=!netHidden;renderMain();}
 
 // ADD TRANSACTION
 function openAddTx(){txType='expense';openModal(txModalHTML());}
@@ -1044,7 +1056,7 @@ function submitTx(){
   S.transactions.unshift(tx);save();closeModal();renderMain();
 }
 
-// TX DETAIL & EDIT
+// TX DETAIL
 function showTxD(id){
   const t=S.transactions.find(x=>x.id===id);if(!t)return;
   let icon,label,ac,pfx;
@@ -1052,35 +1064,7 @@ function showTxD(id){
   else if(t.type==='income'){const c=getCat('income',t.category);icon=catIco(t.category,32);label=c.label;ac='var(--green)';pfx='+';}
   else{icon=ico('wallet_type',32);label='Transfer';ac='var(--blue)';pfx='→';}
   const w=getWlt(t.wallet);
-  openModal(`<div class="modal-title">Transaction Detail</div><div style="text-align:center;padding:16px 0 20px;"><div style="display:flex;justify-content:center;margin-bottom:8px;opacity:.7;">${icon}</div><div style="font-size:13px;color:var(--text2);margin-bottom:6px;">${label}</div><div style="font-family:'Space Mono',monospace;font-size:34px;font-weight:700;color:${ac};">${pfx}${fmt(t.amount)}</div></div><div class="card" style="margin-bottom:16px;"><div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Date</span><span style="font-weight:700;margin-left:auto;">${fmtD(t.date)}</span></div><div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Type</span><span style="font-weight:700;margin-left:auto;text-transform:capitalize;">${t.type}</span></div><div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Wallet</span><span style="font-weight:700;margin-left:auto;">${w.name}</span></div>${t.type==='transfer'?`<div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">To Wallet</span><span style="font-weight:700;margin-left:auto;">${getWlt(t.toWallet).name}</span></div>`:''}<div class="tx-item" style="cursor:default;border-bottom:none;"><span style="color:var(--text3);">Note</span><span style="font-weight:700;margin-left:auto;">${t.note||'–'}</span></div></div><div style="display:flex;gap:8px;"><button class="btn btn-d" style="flex:1;" onclick="delTx('${t.id}')">Delete</button><button class="btn btn-p" style="flex:1;" onclick="editTx('${t.id}')">Edit</button></div><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Close</button>`);
-}
-function editTx(id){
-  const t=S.transactions.find(x=>x.id===id);if(!t)return;
-  // Reverse original effect
-  if(t.type==='expense'){const w=S.wallets.find(x=>x.id===t.wallet);if(w)w.balance+=t.amount;}
-  else if(t.type==='income'){const w=S.wallets.find(x=>x.id===t.wallet);if(w)w.balance-=t.amount;}
-  else{const fw=S.wallets.find(x=>x.id===t.wallet);const tw=S.wallets.find(x=>x.id===t.toWallet);if(fw)fw.balance+=t.amount;if(tw)tw.balance-=t.amount;}
-  
-  // Remove old transaction
-  S.transactions=S.transactions.filter(x=>x.id!==id);
-  
-  // Open add modal with pre-filled values
-  txType=t.type;
-  openModal(txModalHTML());
-  
-  // Set form values after modal renders
-  setTimeout(()=>{
-    if(t.type!=='transfer'){
-      const wSel=document.getElementById('tx-w');if(wSel)wSel.value=t.wallet||'';
-      const catSel=document.getElementById('tx-cat');if(catSel)catSel.value=t.category||'';
-    }else{
-      const wSel=document.getElementById('tx-w');if(wSel)wSel.value=t.wallet||'';
-      const twSel=document.getElementById('tx-tw');if(twSel)twSel.value=t.toWallet||'';
-    }
-    const dtInp=document.getElementById('tx-dt');if(dtInp)dtInp.value=t.date||todayD();
-    const amtInp=document.getElementById('tx-amt');if(amtInp)amtInp.value=t.amount;
-    const noteInp=document.getElementById('tx-note');if(noteInp)noteInp.value=t.note||'';
-  },50);
+  openModal(`<div class="modal-title">Transaction Detail</div><div style="text-align:center;padding:16px 0 20px;"><div style="display:flex;justify-content:center;margin-bottom:8px;opacity:.7;">${icon}</div><div style="font-size:13px;color:var(--text2);margin-bottom:6px;">${label}</div><div style="font-family:'Space Mono',monospace;font-size:34px;font-weight:700;color:${ac};">${pfx}${fmt(t.amount)}</div></div><div class="card" style="margin-bottom:16px;"><div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Date</span><span style="font-weight:700;margin-left:auto;">${fmtD(t.date)}</span></div><div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Type</span><span style="font-weight:700;margin-left:auto;text-transform:capitalize;">${t.type}</span></div><div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Wallet</span><span style="font-weight:700;margin-left:auto;">${w.name}</span></div>${t.type==='transfer'?`<div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">To Wallet</span><span style="font-weight:700;margin-left:auto;">${getWlt(t.toWallet).name}</span></div>`:''}<div class="tx-item" style="cursor:default;border-bottom:none;"><span style="color:var(--text3);">Note</span><span style="font-weight:700;margin-left:auto;">${t.note||'–'}</span></div></div><button class="btn btn-s" onclick="openEditTx('${t.id}')" style="margin-bottom:6px;">Edit Transaction</button><button class="btn btn-d" onclick="delTx('${t.id}')">Delete Transaction</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Close</button>`);
 }
 function delTx(id){
   const t=S.transactions.find(x=>x.id===id);if(!t)return;
@@ -1091,10 +1075,53 @@ function delTx(id){
   S.transactions=S.transactions.filter(x=>x.id!==id);save();closeModal();renderMain();
 }
 
-// CATEGORY MANAGE
+function openEditTx(id){
+  const t=S.transactions.find(x=>x.id===id);if(!t)return;
+  const wOpts=S.wallets.map(w=>`<option value="${w.id}" ${w.id===t.wallet?'selected':''}>${w.name}</option>`).join('');
+  if(t.type==='transfer'){
+    openModal(`<div class="modal-title">Edit Transfer</div>
+    <div style="background:var(--blue-d);border:1px solid rgba(77,159,255,.2);border-radius:10px;padding:9px 12px;margin-bottom:14px;font-size:12px;color:var(--blue);">Only date and note can be edited for transfers.</div>
+    <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="et-dt" value="${t.date}"></div>
+    <div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="et-note" value="${t.note||''}"></div>
+    <button class="btn btn-p" onclick="submitEditTx('${id}')">Update</button>
+    <button class="btn btn-s" onclick="showTxD('${id}')" style="margin-top:8px;">← Back</button>`);
+    return;
+  }
+  const catOpts=(t.type==='expense'?getExpCats():getIncCats()).map(c=>`<option value="${c.id}" ${c.id===t.category?'selected':''}>${c.label}</option>`).join('');
+  openModal(`<div class="modal-title">Edit ${t.type==='expense'?'Expense':'Income'}</div>
+  <div class="fg"><label class="fl">Wallet</label><select class="fi" id="et-w">${wOpts}</select></div>
+  <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="et-dt" value="${t.date}"></div>
+  <div class="fg"><label class="fl">Category</label><select class="fi" id="et-cat">${catOpts}</select></div>
+  <div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="et-amt" value="${t.amount}" min="0" step="0.01"></div></div>
+  <div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="et-note" value="${t.note||''}" placeholder="What was this for?"></div>
+  <button class="btn btn-p" onclick="submitEditTx('${id}')">Update</button>
+  <button class="btn btn-s" onclick="showTxD('${id}')" style="margin-top:8px;">← Back</button>`);
+}
+function submitEditTx(id){
+  const t=S.transactions.find(x=>x.id===id);if(!t)return;
+  const dt=document.getElementById('et-dt').value;const note=document.getElementById('et-note').value.trim();
+  if(!dt)return alert('Select a date.');
+  if(t.type!=='transfer'){
+    const newAmt=parseFloat(document.getElementById('et-amt').value);
+    const newW=document.getElementById('et-w').value;
+    const newCat=document.getElementById('et-cat').value;
+    if(!newAmt||newAmt<=0)return alert('Enter a valid amount.');
+    if(!newW)return alert('Select a wallet.');
+    if(!newCat)return alert('Select a category.');
+    // Reverse old wallet balance
+    const oldW=S.wallets.find(x=>x.id===t.wallet);
+    if(oldW){if(t.type==='expense')oldW.balance+=t.amount;else oldW.balance-=t.amount;}
+    // Apply new wallet balance
+    const nW=S.wallets.find(x=>x.id===newW);
+    if(nW){if(t.type==='expense')nW.balance-=newAmt;else nW.balance+=newAmt;}
+    t.amount=newAmt;t.wallet=newW;t.category=newCat;
+  }
+  t.date=dt;t.note=note;t.edited=new Date().toISOString();
+  save();closeModal();renderMain();
+}
 function openManageCats(type){
   const isExp=type==='expense';const customs=isExp?S.customExpCats:S.customIncCats;
-  openModal(`<div class="modal-title">Manage ${isExp?'Expense':'Income'} Categories</div><div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Default categories cannot be deleted.</div><div class="card" style="margin-bottom:16px;">${(isExp?DEFAULT_EXP_CATS:DEFAULT_INC_CATS).map(c=>`<div class="cat-list-item"><span>${c.label}</span><span style="font-size:10px;color:var(--text3);">Default</span></div>`).join('')}${customs.map((c,i)=>`<div class="cat-list-item"><span>${c.label}</span><button class="del-btn" style="width:24px;height:24px;font-size:12px;" onclick="delCustomCat('${type}',${i})">×</button></div>`).join('')}</div><div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.8px;">Add Custom Category</div><div style="display:flex;gap:8px;margin-bottom:10px;"><input type="text" class="fi" id="nc-icon" placeholder="Emoji" style="width:60px;text-align:center;padding:11px 8px;"><input type="text" class="fi" id="nc-name" placeholder="Category name" style="flex:1;"></div><button class="btn btn-p" onclick="addCustomCat('${type}')">Add Category</button><button class="btn btn-s" onclick="openAddTx()" style="margin-top:8px;">← Back</button>`);
+  openModal(`<div class="modal-title">Manage ${isExp?'Expense':'Income'} Categories</div><div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Default categories cannot be deleted.</div><div class="card" style="margin-bottom:16px;">${(isExp?DEFAULT_EXP_CATS:DEFAULT_INC_CATS).map(c=>`<div class="cat-list-item"><span>${c.icon} ${c.label}</span><span style="font-size:10px;color:var(--text3);">Default</span></div>`).join('')}${customs.map((c,i)=>`<div class="cat-list-item"><span>${c.icon} ${c.label}</span><button class="del-btn" style="width:24px;height:24px;font-size:12px;" onclick="delCustomCat('${type}',${i})">×</button></div>`).join('')}</div><div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.8px;">Add Custom Category</div><div style="display:flex;gap:8px;margin-bottom:10px;"><input type="text" class="fi" id="nc-icon" placeholder="Emoji" style="width:60px;text-align:center;padding:11px 8px;"><input type="text" class="fi" id="nc-name" placeholder="Category name" style="flex:1;"></div><button class="btn btn-p" onclick="addCustomCat('${type}')">Add Category</button><button class="btn btn-s" onclick="openAddTx()" style="margin-top:8px;">← Back</button>`);
 }
 function addCustomCat(type){const icon=document.getElementById('nc-icon').value.trim()||'📌';const label=document.getElementById('nc-name').value.trim();if(!label)return alert('Enter a category name.');const c={id:'custom_'+uid(),label,icon};if(type==='expense')S.customExpCats.push(c);else S.customIncCats.push(c);save();openManageCats(type);}
 function delCustomCat(type,idx){if(!confirm('Delete this category?'))return;if(type==='expense')S.customExpCats.splice(idx,1);else S.customIncCats.splice(idx,1);save();openManageCats(type);}
@@ -1104,7 +1131,7 @@ function openAddWlt(){editWltId='';selColor=COLORS[0];showWltModal();}
 function openEditWlt(id){editWltId=id;const w=S.wallets.find(x=>x.id===id);selColor=w?w.color:COLORS[0];showWltModal();}
 function showWltModal(){
   const e=editWltId?S.wallets.find(x=>x.id===editWltId):null;
-  openModal(`<div class="modal-title">${e?'Edit':'Add'} Wallet</div><div class="fg"><label class="fl">Name</label><input type="text" class="fi" id="w-nm" placeholder="e.g. bKash Main" value="${e?e.name:''}"></div><div class="fg"><label class="fl">Type</label><select class="fi" id="w-tp">${WLT_TYPES.map(t=>`<option value="${t.id}" ${e&&e.type===t.id?'selected':''}>${t.label}</option>`).join('')}</select></div><div class="fg"><label class="fl">${e?'Current':'Initial'} Balance (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="w-bal" placeholder="0.00" value="${e?e.balance:0}"></div></div><div class="fg"><label class="fl">Color</label><div class="col-picker">${COLORS.map(c=>`<div class="col-swatch${selColor===c?' sel':''}" style="background:${c};" onclick="pickCol('${c}')" data-c="${c}"></div>`).join('')}</div></div><button class="btn btn-p" onclick="submitWlt()">${e?'Update':'Add'} Wallet</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+  openModal(`<div class="modal-title">${e?'Edit':'Add'} Wallet</div><div class="fg"><label class="fl">Name</label><input type="text" class="fi" id="w-nm" placeholder="e.g. bKash Main" value="${e?e.name:''}"></div><div class="fg"><label class="fl">Type</label><select class="fi" id="w-tp">${wltTypeOpts(e?e.type:'')}</select></div><div class="fg"><label class="fl">${e?'Current':'Initial'} Balance (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="w-bal" placeholder="0.00" value="${e?e.balance:0}"></div></div><div class="fg"><label class="fl">Color</label><div class="col-picker">${COLORS.map(c=>`<div class="col-swatch${selColor===c?' sel':''}" style="background:${c};" onclick="pickCol('${c}')" data-c="${c}"></div>`).join('')}</div></div><button class="btn btn-p" onclick="submitWlt()">${e?'Update':'Add'} Wallet</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
 function pickCol(c){selColor=c;document.querySelectorAll('.col-swatch').forEach(el=>el.classList.toggle('sel',el.dataset.c===c));}
 function submitWlt(){
@@ -1117,7 +1144,6 @@ function submitWlt(){
 function delWlt(id){const w=S.wallets.find(x=>x.id===id);if(!w)return;if(!confirm(`Delete wallet "${w.name}"?`))return;S.wallets=S.wallets.filter(x=>x.id!==id);save();renderMain();}
 
 // BUDGET
-function curYear(){return S.month.slice(0,4);}
 function openAddBgt(pre){
   openModal(`<div class="modal-title">Set Budget / Savings</div>
   <div class="fg"><label class="fl">Type</label><select class="fi" id="b-type" onchange="bgtTypeChanged()">
@@ -1132,16 +1158,39 @@ function openAddBgt(pre){
   <div id="b-hint" style="font-size:12px;color:var(--text3);margin-bottom:14px;">Applies to ${fmtMY(S.month)}</div>
   <button class="btn btn-p" onclick="submitBgt()">Save</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
+
 function openAddBudgetModal(period){
   openModal(`<div class="modal-title">Set ${period==='monthly'?'Monthly':'Yearly'} Budget</div>
   <div class="fg"><label class="fl">Amount (৳) · ${period==='monthly'?fmtMY(S.month):curYear()}</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="b-amt" placeholder="0.00" min="0"></div></div>
   <button class="btn btn-p" onclick="submitBudgetOnly('${period}')">Save</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
+
 function openAddSavingsModal(period){
   openModal(`<div class="modal-title">Set ${period==='monthly'?'Monthly':'Yearly'} Savings Target</div>
   <div class="fg"><label class="fl">Target Amount (৳) · ${period==='monthly'?fmtMY(S.month):curYear()}</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="b-amt" placeholder="0.00" min="0"></div></div>
   <button class="btn btn-p" onclick="submitSavingsOnly('${period}')">Save</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
+
+function openAddBgtCat(catId){
+  openModal(`<div class="modal-title">Set Category Budget</div>
+  <div class="fg"><label class="fl">Category</label><select class="fi" id="b-cat">${getExpCats().map(c=>`<option value="${c.id}" ${c.id===catId?'selected':''}>${c.label}</option>`).join('')}</select></div>
+  <div class="fg"><label class="fl">Amount (৳) · ${fmtMY(S.month)}</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="b-amt" placeholder="0.00" min="0"></div></div>
+  <button class="btn btn-p" onclick="submitBgtCat()">Save</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+}
+
+function openEditBgt(bgtId){
+  const b=S.budgets.find(x=>x.id===bgtId);if(!b)return;
+  const lbl=b.period==='yearly'?`Year ${b.year}`:`${fmtMY(b.month)}`;
+  openModal(`<div class="modal-title">Edit Budget</div>
+  <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--text2);">
+    Category: <b style="color:var(--text);">${b.category==='overall'?'Overall':b.category==='savings'?'Savings':getCat('expense',b.category).label}</b> · Period: <b style="color:var(--text);">${lbl}</b>
+  </div>
+  <div class="fg"><label class="fl">New Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="b-edit-amt" placeholder="0.00" min="0" value="${b.amount}"></div></div>
+  <button class="btn btn-p" onclick="submitEditBgt('${bgtId}')">Update</button>
+  <button class="btn btn-d" onclick="delBgt('${bgtId}')" style="margin-top:8px;">Delete Budget</button>
+  <button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+}
+
 function submitBudgetOnly(period){
   const amt=parseFloat(document.getElementById('b-amt').value);
   if(!amt||amt<=0)return alert('Enter a valid amount.');
@@ -1157,6 +1206,7 @@ function submitBudgetOnly(period){
   }
   save();closeModal();renderMain();
 }
+
 function submitSavingsOnly(period){
   const amt=parseFloat(document.getElementById('b-amt').value);
   if(!amt||amt<=0)return alert('Enter a valid amount.');
@@ -1172,29 +1222,14 @@ function submitSavingsOnly(period){
   }
   save();closeModal();renderMain();
 }
-function openAddBgtCat(catId){
-  openModal(`<div class="modal-title">Set Category Budget</div>
-  <div class="fg"><label class="fl">Category</label><select class="fi" id="b-cat">${getExpCats().map(c=>`<option value="${c.id}" ${c.id===catId?'selected':''}>${c.label}</option>`).join('')}</select></div>
-  <div class="fg"><label class="fl">Amount (৳) · ${fmtMY(S.month)}</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="b-amt" placeholder="0.00" min="0"></div></div>
-  <button class="btn btn-p" onclick="submitBgtCat()">Save</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
-}
-function openEditBgt(bgtId){
-  const b=S.budgets.find(x=>x.id===bgtId);if(!b)return;
-  const lbl=b.period==='yearly'?`Year ${b.year}`:`${fmtMY(b.month)}`;
-  openModal(`<div class="modal-title">Edit Budget</div>
-  <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--text2);">
-    Category: <b style="color:var(--text);">${b.category==='overall'?'Overall':b.category==='savings'?'Savings':getCat('expense',b.category).label}</b> · Period: <b style="color:var(--text);">${lbl}</b>
-  </div>
-  <div class="fg"><label class="fl">New Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="b-edit-amt" placeholder="0.00" min="0" value="${b.amount}"></div></div>
-  <button class="btn btn-p" onclick="submitEditBgt('${bgtId}')">Update</button>
-  <button class="btn btn-d" onclick="delBgt('${bgtId}')" style="margin-top:8px;">Delete Budget</button>
-  <button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
-}
+
 function submitEditBgt(bgtId){
   const amt=parseFloat(document.getElementById('b-edit-amt').value);if(!amt||amt<=0)return alert('Enter a valid amount.');
   const b=S.budgets.find(x=>x.id===bgtId);if(b){b.amount=amt;}save();closeModal();renderMain();
 }
+
 function delBgt(id){if(!confirm('Delete this budget?'))return;S.budgets=S.budgets.filter(x=>x.id!==id);save();closeModal();renderMain();}
+
 function bgtTypeChanged(){
   const t=document.getElementById('b-type').value;
   const cw=document.getElementById('b-cat-wrap');const h=document.getElementById('b-hint');
@@ -1202,6 +1237,7 @@ function bgtTypeChanged(){
   const hints={monthly_overall:`Applies to ${fmtMY(S.month)}`,yearly_overall:`Applies to full year ${curYear()}`,monthly_savings:`Monthly savings target for ${fmtMY(S.month)}`,yearly_savings:`Yearly savings target for ${curYear()}`,category:`Category budget for ${fmtMY(S.month)}`};
   if(h)h.textContent=hints[t]||'';
 }
+
 function submitBgt(){
   const type=document.getElementById('b-type').value;const amt=parseFloat(document.getElementById('b-amt').value);
   if(!amt||amt<=0)return alert('Enter a valid amount.');
@@ -1213,6 +1249,7 @@ function submitBgt(){
   else{const catEl=document.getElementById('b-cat');const cat=catEl?catEl.value:'';if(!cat)return alert('Select a category.');const idx=S.budgets.findIndex(b=>b.category===cat&&b.month===S.month&&b.period!=='yearly');if(idx>=0)S.budgets[idx].amount=amt;else S.budgets.push({id:uid(),category:cat,amount:amt,month:S.month,period:'monthly'});}
   save();closeModal();renderMain();
 }
+
 function submitBgtCat(){
   const cat=document.getElementById('b-cat').value;const amt=parseFloat(document.getElementById('b-amt').value);
   if(!cat)return alert('Select a category.');if(!amt||amt<=0)return alert('Enter a valid amount.');
@@ -1220,21 +1257,74 @@ function submitBgtCat(){
   if(idx>=0)S.budgets[idx].amount=amt;else S.budgets.push({id:uid(),category:cat,amount:amt,month:S.month,period:'monthly'});
   save();closeModal();renderMain();
 }
+
 function showBgtTab(tab){
   const m=document.getElementById('bgt-monthly');const y=document.getElementById('bgt-yearly');const tm=document.getElementById('btab-m');const ty=document.getElementById('btab-y');
   if(!m||!y)return;
   if(tab==='monthly'){m.style.display='';y.style.display='none';if(tm)tm.classList.add('active');if(ty)ty.classList.remove('active');}
   else{m.style.display='none';y.style.display='';if(ty)ty.classList.add('active');if(tm)tm.classList.remove('active');}
 }
-
+  
 // LOANS
-function openAddLoan(){
+function openAddLoan(prefill){
   const wOpts=S.wallets.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
-  openModal(`<div class="modal-title">New Loan / Deposit Entry</div><div class="fg"><label class="fl">Type</label><select class="fi" id="ln-tp" onchange="lnTypeChanged()"><option value="deposit">Taking a Deposit</option><option value="loan_recv">Loan Received</option><option value="loan_given">Loan Given</option></select></div><div id="ln-wallet-info" style="font-size:12px;background:var(--blue-d);border:1px solid rgba(77,159,255,.2);border-radius:10px;padding:9px 12px;margin-bottom:14px;color:var(--blue);">Taking a Deposit: money will be <b>added</b> to wallet (optional)</div><div class="fg"><label class="fl">Person / Organization</label><input type="text" class="fi" id="ln-pr" placeholder="Name"></div><div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="ln-amt" placeholder="0.00" min="0"></div></div><div class="fg"><label class="fl">Wallet <span style="color:var(--text3);text-transform:none;letter-spacing:0;font-weight:500;">(optional)</span></label><select class="fi" id="ln-w"><option value="">-- No wallet --</option>${wOpts}</select></div><div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="ln-dt" value="${todayD()}"></div><div class="fg"><label class="fl">Due Date (optional)</label><input type="date" class="fi" id="ln-dd"></div><div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="ln-nt" placeholder="Additional details"></div><button class="btn btn-p" onclick="submitLoan()">Add Record</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+  const pf=prefill||{};
+  openModal(`<div class="modal-title">New Loan / Deposit Entry</div><div class="fg"><label class="fl">Type</label><select class="fi" id="ln-tp" onchange="lnTypeChanged()">
+    <option value="deposit" ${pf.type==='deposit'?'selected':''}>Taking a Deposit</option>
+    <option value="loan_recv" ${pf.type==='loan_recv'?'selected':''}>Loan Received</option>
+    <option value="loan_given" ${pf.type==='loan_given'?'selected':''}>Loan Given</option>
+  </select></div><div id="ln-wallet-info" style="font-size:12px;background:var(--blue-d);border:1px solid rgba(77,159,255,.2);border-radius:10px;padding:9px 12px;margin-bottom:14px;color:var(--blue);">Taking a Deposit: money will be <b>added</b> to wallet (optional)</div><div class="fg"><label class="fl">Person / Organization</label><input type="text" class="fi" id="ln-pr" placeholder="Name" value="${pf.person||''}"></div><div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="ln-amt" placeholder="0.00" min="0"></div></div><div class="fg"><label class="fl">Wallet <span style="color:var(--text3);text-transform:none;letter-spacing:0;font-weight:500;">(optional)</span></label><select class="fi" id="ln-w"><option value="">-- No wallet --</option>${wOpts}</select></div><div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="ln-dt" value="${todayD()}"></div><div class="fg"><label class="fl">Due Date (optional)</label><input type="date" class="fi" id="ln-dd"></div><div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="ln-nt" placeholder="Additional details"></div><button class="btn btn-p" onclick="submitLoan()">Add Record</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);}
+function openAddLoanFor(person,type){openAddLoan({person,type});}
+
+function openAddSubEntry(loanId){
+  const loan=S.loans.find(l=>l.id===loanId);if(!loan)return;
+  const cfg=LOAN_TYPES[loan.type];
+  const wOpts=S.wallets.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
+  openModal(`<div class="modal-title">Add More – ${loan.person}</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+    <div style="font-size:12px;color:var(--text3);">Type: <b style="color:var(--text);">${cfg.label}</b></div>
+    <div style="font-size:12px;color:var(--text3);margin-top:3px;">Current total: <b style="color:var(--text);">${fmt(loanTotal(loan))}</b> · Remaining: <b style="color:var(--red);">${fmt(loanRemain(loan))}</b></div>
+  </div>
+  <div class="fg"><label class="fl">Additional Amount (৳)</label>
+    <div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="se-amt" placeholder="0.00" min="0"></div>
+  </div>
+  <div class="fg">
+    <label class="fl">Wallet <span style="color:var(--text3);text-transform:none;letter-spacing:0;font-weight:500;">(optional)</span></label>
+    <select class="fi" id="se-w"><option value="">-- No wallet --</option>${wOpts}</select>
+  </div>
+  <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="se-dt" value="${todayD()}"></div>
+  <div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="se-nt" placeholder="e.g. second installment"></div>
+  <button class="btn btn-p" onclick="submitSubEntry('${loanId}')">Add to Record</button>
+  <button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
-function openAddLoanToPerson(type, person){
-  const wOpts=S.wallets.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
-  openModal(`<div class="modal-title">Add to ${person}</div><div class="fg"><label class="fl">Type</label><select class="fi" id="ln-tp"><option value="${type}">${LOAN_TYPES[type].label}</option></select></div><div class="fg"><label class="fl">Person</label><input type="text" class="fi" id="ln-pr" value="${person}"></div><div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="ln-amt" placeholder="0.00" min="0"></div></div><div class="fg"><label class="fl">Wallet <span style="color:var(--text3);">(optional)</span></label><select class="fi" id="ln-w"><option value="">-- No wallet --</option>${wOpts}</select></div><div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="ln-dt" value="${todayD()}"></div><div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="ln-nt" placeholder="Additional details"></div><button class="btn btn-p" onclick="submitLoan()">Add Record</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+function submitSubEntry(loanId){
+  const loan=S.loans.find(l=>l.id===loanId);if(!loan)return;
+  const amt=parseFloat(document.getElementById('se-amt').value);
+  const w=document.getElementById('se-w').value;
+  const dt=document.getElementById('se-dt').value;
+  const nt=document.getElementById('se-nt').value.trim();
+  if(!amt||amt<=0)return alert('Enter a valid amount.');
+  if(!dt)return alert('Select a date.');
+  // Affect wallet
+  if(w){
+    const cfg=LOAN_TYPES[loan.type];
+    const wObj=S.wallets.find(x=>x.id===w);
+    if(wObj){if(cfg.walletDir==='in')wObj.balance+=amt;else wObj.balance-=amt;}
+  }
+  if(!loan.extraEntries)loan.extraEntries=[];
+  loan.extraEntries.push({id:uid(),amount:amt,wallet:w||'',date:dt,note:nt});
+  save();closeModal();renderMain();
+}
+function delLoanSubEntry(loanId,idx){
+  const loan=S.loans.find(l=>l.id===loanId);if(!loan)return;
+  const e=(loan.extraEntries||[])[idx];if(!e)return;
+  if(!confirm('Remove this entry? Wallet balance will be reversed if a wallet was linked.'))return;
+  if(e.wallet){
+    const cfg=LOAN_TYPES[loan.type];
+    const wObj=S.wallets.find(x=>x.id===e.wallet);
+    if(wObj){if(cfg.walletDir==='in')wObj.balance-=e.amount;else wObj.balance+=e.amount;}
+  }
+  loan.extraEntries.splice(idx,1);save();renderMain();
 }
 function lnTypeChanged(){const tp=document.getElementById('ln-tp').value;const info=document.getElementById('ln-wallet-info');const msgs={deposit:'Taking a Deposit: money will be <b>added</b> to wallet (optional)',loan_recv:'Loan Received: money will be <b>added</b> to wallet (optional)',loan_given:'Loan Given: money will be <b>deducted</b> from wallet (optional)'};if(info)info.innerHTML=msgs[tp]||'';}
 function submitLoan(){
@@ -1278,7 +1368,7 @@ async function manualPull(){closeModal();setSyncDot('busy');await pullSync();ale
 
 // EXPORT
 function openExportModal(){
-  openModal(`<div class="modal-title">Export</div>
+  openModal(`<div class="modal-title">Export to Excel</div>
   <div class="fg"><label class="fl">Duration</label>
     <select class="fi" id="ex-dur" onchange="exDurChanged()">
       <option value="all">Lifetime (All)</option>
