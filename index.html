@@ -726,7 +726,7 @@ function rTxs(){
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;">Transactions</div>
       <div style="display:flex;gap:6px;">
-        <button class="sm-btn" onclick="openExportModal()">Export .xlsx</button>
+        <button class="sm-btn" onclick="openExportModal()">Export</button>
       </div>
     </div>
     <!-- Duration filter -->
@@ -1140,7 +1140,7 @@ function openExportModal(){
     <div class="fg"><label class="fl">From Date</label><input type="date" class="fi" id="ex-from"></div>
     <div class="fg"><label class="fl">To Date</label><input type="date" class="fi" id="ex-to" value="${todayD()}"></div>
   </div>
-  <button class="btn btn-p" onclick="doExport()">⬇ Download .xlsx</button>
+  <button class="btn btn-p" onclick="doExport()">⬇ Download</button>
   <button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
 function exDurChanged(){const v=document.getElementById('ex-dur').value;const c=document.getElementById('ex-custom');if(c)c.style.display=v==='custom'?'':'none';}
