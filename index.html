@@ -141,6 +141,18 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .bgt-cat{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;}
 .bgt-amts{font-family:'Space Mono',monospace;font-size:11px;color:var(--text3);}
 
+/* BUDGET PERIOD TABS – Frosted Glass active state */
+.bgt-tab-wrap{display:flex;gap:5px;background:rgba(255,255,255,.03);border:1px solid var(--border);padding:4px;border-radius:14px;margin-bottom:14px;}
+.bgt-tab-btn{flex:1;padding:9px 8px;border-radius:10px;border:none;background:transparent;color:var(--text3);font-size:13px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .25s;position:relative;}
+.bgt-tab-btn.active{
+  color:var(--text);
+  background:rgba(255,255,255,0.07);
+  backdrop-filter:blur(16px) saturate(1.6);
+  -webkit-backdrop-filter:blur(16px) saturate(1.6);
+  border:1px solid rgba(255,255,255,0.12);
+  box-shadow:0 2px 16px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06);
+}
+
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s;}
 .modal-overlay.open{opacity:1;pointer-events:all;}
@@ -187,7 +199,7 @@ select.fi{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='
 /* FILTER */
 .filter-bar{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;}
 .filter-bar::-webkit-scrollbar{display:none;}
-.fc{padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:'Outfit',sans-serif;}
+.fc{padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15px;font-family:'Outfit',sans-serif;}
 .fc.active{background:var(--green-d);border-color:var(--green);color:var(--green);}
 
 /* SEARCH */
@@ -365,7 +377,6 @@ const WLT_TYPES=[
   {id:'bank',label:'Bank Account',icon:'🏦'},{id:'drawer',label:'Drawer',icon:'🗄️'},
   {id:'wallet',label:'Wallet',icon:'👛'},{id:'cash',label:'Cash',icon:'💵'},{id:'mfs',label:'MFS',icon:'📱'},
 ];
-// Dropdown options (no emojis)
 function loanTypeOpts(selVal){return Object.entries(LOAN_TYPES).map(([k,v])=>`<option value="${k}" ${k===selVal?'selected':''}>${v.label}</option>`).join('');}
 function wltTypeOpts(selVal){return WLT_TYPES.map(t=>`<option value="${t.id}" ${t.id===selVal?'selected':''}>${t.label}</option>`).join('');}
 const COLORS=['#0ce97f','#4d9fff','#ff3d5a','#ffb020','#9d6fff','#ff6b35','#00d4ff','#f472b6'];
@@ -385,6 +396,8 @@ const ICON_PATHS={
   clothing:'<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>',
   tech:'<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="2" y1="20" x2="22" y2="20"/>',
   travel:'<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19 4c-1 0-2 .5-2.5 1L13 9 4.8 6.2c-.5-.2-1.1 0-1.4.5l-.5.9c-.3.5-.1 1.1.3 1.4L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.9.6 1.4.3l.9-.5c.5-.3.7-.9.5-1.4"/>',
+  /* FIX 1: Clean heart-only donation icon, no cross inside */
+  donation:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
   family:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
   bonus:'<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>',
   relatives:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
@@ -411,7 +424,6 @@ const ICON_PATHS={
   empty_loan:'<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="7" y1="15" x2="17" y2="15"/>',
   empty_budget:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
   budget_icon:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
-  donation:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/><path d="M12 8v8M8 12h8" stroke-linecap="round"/>',
 };
 const TRASH_SVG=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ff3d5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
 const EDIT_SVG=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
@@ -482,6 +494,15 @@ setInterval(()=>{if(fbUrl())pullSync();},45000);
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function fmt(n){return'৳'+Math.abs(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fmtInt(n){return'৳'+Math.abs(Math.round(n||0)).toLocaleString('en-US');}
+/* FIX 4: Signed format – shows minus sign for negative values */
+function fmtSigned(n){
+  const abs=Math.abs(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return(n<0?'-':'')+'৳'+abs;
+}
+function fmtIntSigned(n){
+  const abs=Math.abs(Math.round(n||0)).toLocaleString('en-US');
+  return(n<0?'-':'')+'৳'+abs;
+}
 function fmtD(d){if(!d)return'';return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
 function fmtMY(ym){if(!ym)return'';const[y,m]=ym.split('-');return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]+' '+y;}
 function getCat(type,id){return(type==='expense'?getExpCats():getIncCats()).find(c=>c.id===id)||{label:id||'?',icon:'📋'};}
@@ -505,7 +526,6 @@ function catIncomeAll(m){
   const map={};mTxs(m).filter(t=>t.type==='income').forEach(t=>{map[t.category]=(map[t.category]||0)+t.amount;});
   return Object.entries(map).map(([id,amount])=>({...getCat('income',id),id,amount})).sort((a,b)=>b.amount-a.amount);
 }
-// Loan helpers - supports extraEntries for adding multiple deposits to one card
 function loanTotal(l){return l.amount+(l.extraEntries||[]).reduce((s,e)=>s+e.amount,0);}
 function loanPaid(l){return(l.payments||[]).reduce((s,p)=>s+p.amount,0);}
 function loanRemain(l){return loanTotal(l)-loanPaid(l);}
@@ -540,9 +560,8 @@ function rDash(){
   const yr=curYear();
   const ys=yrStats(yr);
   const ms=mStats(S.month);
-  // Monthly savings budget
   const mSavBgt=getSavingsBgt('monthly',S.month);
-  // 6-month bars (income + expense)
+  // 6-month bars
   const bars=[];
   for(let i=5;i>=0;i--){const d=new Date();d.setMonth(d.getMonth()-i);const ym=d.toISOString().slice(0,7);const s=mStats(ym);bars.push({lbl:d.toLocaleDateString('en-US',{month:'short'}),exp:s.exp,inc:s.inc});}
   const maxB=Math.max(...bars.flatMap(b=>[b.exp,b.inc]),1);
@@ -558,6 +577,10 @@ function rDash(){
   // Recent transactions
   const rec=[...S.transactions].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id)).slice(0,5);
 
+  /* FIX 4: use fmtSigned for the main balance so negatives show '-' */
+  const balDisplay = balHidden ? '••••••' : fmtSigned(ys.net);
+  const balColor = ys.net < 0 ? 'var(--red)' : 'var(--text)';
+
   return`
   <div class="section" style="padding-top:18px;">
     ${!fbUrl()?`<div class="sync-banner"><span style="display:flex;align-items:center;color:var(--blue);">${ico('cloud_sync',16,'#4d9fff')}</span> <span style="flex:1;"><b>Cloud Sync not set up.</b> Data only saves on this device. <button onclick="openSyncModal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-weight:700;font-family:'Outfit',sans-serif;">Set up →</button></span></div>`:''}
@@ -570,7 +593,7 @@ function rDash(){
           ${balHidden?ico('eye',15):ico('eye_off',15)}
         </button>
       </div>
-      <div class="bal-amount">${balHidden?'••••••':fmt(ys.net)}</div>
+      <div class="bal-amount" style="color:${balColor};">${balDisplay}</div>
       <div class="bal-sub">${ys.sav>0?`Income − Expense − Savings target`:`Yearly Income − Expense`}</div>
       <div class="bal-row">
         <div class="bal-stat">
@@ -583,7 +606,7 @@ function rDash(){
         </div>
         <div class="bal-stat">
           <div class="bsl" style="display:flex;align-items:center;gap:4px;">Net<button onclick="toggleNet()" style="background:none;border:none;padding:0;cursor:pointer;color:var(--text3);display:flex;align-items:center;">${netHidden?ico('eye',10):ico('eye_off',10)}</button></div>
-          <div class="bsv" style="font-size:12px;color:${ys.simpleNet>=0?'var(--green)':'var(--red)'};">${netHidden?'•••':fmtInt(ys.simpleNet)}</div>
+          <div class="bsv" style="font-size:12px;color:${ys.simpleNet>=0?'var(--green)':'var(--red)'};">${netHidden?'•••':fmtIntSigned(ys.simpleNet)}</div>
         </div>
       </div>
     </div>
@@ -602,7 +625,7 @@ function rDash(){
         </div>
         <div style="flex:1;background:rgba(255,255,255,.04);border-radius:10px;padding:10px 12px;">
           <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Net</div>
-          <div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:${ms.net>=0?'var(--green)':'var(--red)'};">${fmtInt(ms.net)}</div>
+          <div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:${ms.net>=0?'var(--green)':'var(--red)'};">${fmtIntSigned(ms.net)}</div>
         </div>
       </div>
       ${mSavBgt?`<div style="margin-top:10px;border-top:1px solid var(--borderl);padding-top:10px;">
@@ -660,7 +683,7 @@ function rDash(){
     </div>
   </div>`:''}
 
-  <!-- TOP SPENDING (EXPENSE CATEGORIES) -->
+  <!-- TOP SPENDING -->
   ${expCats.length?`
   <div class="section" style="padding-top:14px;">
     <div class="sec-hdr"><div class="sec-title">Spending by Category</div><span style="font-size:11px;color:var(--text3);">${fmtMY(S.month)}</span></div>
@@ -722,12 +745,9 @@ function txHTML(t){
 // ============================================================
 function rTxs(){
   let txs=[...S.transactions].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
-  // Duration filter
   if(txDuration==='monthly')txs=txs.filter(t=>t.date&&t.date.startsWith(S.month));
   else if(txDuration==='yearly')txs=txs.filter(t=>t.date&&t.date.startsWith(curYear()));
-  // Type filter
   if(txF!=='all')txs=txs.filter(t=>t.type===txF);
-  // Search
   if(txQ){const q=txQ.toLowerCase();txs=txs.filter(t=>{const c=t.type==='expense'?getCat('expense',t.category):getCat('income',t.category);return c.label.toLowerCase().includes(q)||(t.note&&t.note.toLowerCase().includes(q));});}
   const groups={};txs.forEach(t=>{const k=fmtD(t.date);if(!groups[k])groups[k]=[];groups[k].push(t);});
   return`
@@ -738,13 +758,11 @@ function rTxs(){
         <button class="sm-btn" onclick="openExportModal()">Export</button>
       </div>
     </div>
-    <!-- Duration filter -->
     <div class="filter-bar" style="margin-bottom:10px;">
       <button class="fc ${txDuration==='all'?'active':''}" onclick="setTxDur('all')">Lifetime</button>
       <button class="fc ${txDuration==='yearly'?'active':''}" onclick="setTxDur('yearly')">Year ${curYear()}</button>
       <button class="fc ${txDuration==='monthly'?'active':''}" onclick="setTxDur('monthly')">${fmtMY(S.month)}</button>
     </div>
-    <!-- Type filter -->
     <div class="filter-bar">
       <button class="fc ${txF==='all'?'active':''}" onclick="setTxF('all')">All</button>
       <button class="fc ${txF==='expense'?'active':''}" onclick="setTxF('expense')">Expense</button>
@@ -807,7 +825,7 @@ function rBudget(){
       <div style="font-size:12px;margin-top:7px;font-weight:700;color:${col};">${pct>=100?'⚠ Exceeded!':pct>80?'⚠ Approaching limit':'✓ '+fmt(bgt.amount-spent)+' remaining'}</div>
     </div>`;
   }
-  
+
   function emptyBudgetCard(label,gradientColor,iconColor,onClick){
     return`<div style="background:linear-gradient(135deg,#0d1420,#0a1422);border:1px solid rgba(${iconColor==='blue'?'77,159,255':iconColor==='amber'?'255,176,32':'12,233,127'},.14);border-radius:18px;padding:18px;margin-bottom:12px;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
@@ -818,7 +836,7 @@ function rBudget(){
       <button class="sm-btn" onclick="${onClick}" style="width:100%;">Set →</button>
     </div>`;
   }
-  
+
   function savCard(bgt,net,label,ac,editFn){
     const pct=Math.max(0,Math.min(100,(net/bgt.amount)*100));const col=net>=bgt.amount?'var(--green)':pct>50?'var(--amber)':'var(--red)';
     return`<div style="background:linear-gradient(135deg,#0a1a10,#081410);border:1px solid rgba(${ac},.14);border-radius:18px;padding:18px;margin-bottom:12px;">
@@ -855,24 +873,23 @@ function rBudget(){
       ${bgt?`<div class="prog"><div class="prog-fill" style="width:${pct}%;background:${col};"></div></div>${pct>80?`<div style="font-size:11px;color:${col};margin-top:4px;font-weight:700;">⚠ ${pct>=100?'Exceeded!':pct.toFixed(0)+'% used'}</div>`:''}`:''}
     </div>`;}).filter(Boolean).join('');
 
+  /* FIX 3: Budget period tabs use .bgt-tab-wrap / .bgt-tab-btn for frosted glass */
   return`
   <div class="section" style="padding-top:16px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
       <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700;">Budget & Savings</div><div style="font-weight:800;font-size:16px;">${fmtMY(S.month)} · ${yr}</div></div>
       <button class="sm-btn" onclick="openAddBgt()">+ Set Budget</button>
     </div>
-    <div style="display:flex;gap:7px;margin-bottom:14px;background:var(--bg3);padding:4px;border-radius:12px;">
-      <button id="btab-m" class="tab-btn active" onclick="showBgtTab('monthly')" style="flex:1;padding:8px;border-radius:9px;">📅 Monthly</button>
-      <button id="btab-y" class="tab-btn" onclick="showBgtTab('yearly')" style="flex:1;padding:8px;border-radius:9px;">📆 Yearly</button>
+    <div class="bgt-tab-wrap">
+      <button id="btab-m" class="bgt-tab-btn active" onclick="showBgtTab('monthly')">📅 Monthly</button>
+      <button id="btab-y" class="bgt-tab-btn" onclick="showBgtTab('yearly')">📆 Yearly</button>
     </div>
     <div id="bgt-monthly">
       ${mHTML}
-      <!-- Monthly Savings -->
       <div style="background:rgba(12,233,127,.04);border:1px solid rgba(12,233,127,.1);border-radius:16px;padding:14px;margin-bottom:12px;">
         <div style="font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;">${ico('savings',14,'#0ce97f')} Savings</div>
         ${mSavHTML}
       </div>
-      <!-- Category budgets -->
       <div class="card">${catItems||`<div class="empty" style="padding:28px;"><div style="display:flex;justify-content:center;margin-bottom:10px;opacity:.4;">${ico('empty_budget',36)}</div><div class="empty-t">No category budgets</div><div class="empty-s">Tap "+ Set Budget" to add one</div></div>`}</div>
     </div>
     <div id="bgt-yearly" style="display:none;">
@@ -884,12 +901,12 @@ function rBudget(){
       <div class="card" style="padding:14px 16px;">
         <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:10px;"><span style="color:var(--text3);">Total Income ${yr}</span><span style="font-family:'Space Mono',monospace;font-weight:700;color:var(--green);">${fmt(yrInc)}</span></div>
         <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:10px;"><span style="color:var(--text3);">Total Expense ${yr}</span><span style="font-family:'Space Mono',monospace;font-weight:700;color:var(--red);">${fmt(yrExp)}</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:13px;border-top:1px solid var(--borderl);padding-top:10px;"><span style="color:var(--text3);">Net Savings ${yr}</span><span style="font-family:'Space Mono',monospace;font-weight:700;color:${yrNet>=0?'var(--green)':'var(--red)'};">${fmt(yrNet)}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;border-top:1px solid var(--borderl);padding-top:10px;"><span style="color:var(--text3);">Net Savings ${yr}</span><span style="font-family:'Space Mono',monospace;font-weight:700;color:${yrNet>=0?'var(--green)':'var(--red)'};">${fmtSigned(yrNet)}</span></div>
       </div>
     </div>
   </div>`;
 }
-  
+
 // ============================================================
 // LOANS
 // ============================================================
@@ -966,7 +983,6 @@ function rLoans(){
     </div></div>`;
   }
 
-  // Person-centric view: group all entries by person first, then type-by-type within each person
   function personCentricHTML(){
     const personMap={};
     loans.forEach(l=>{if(!personMap[l.person])personMap[l.person]=[];personMap[l.person].push(l);});
@@ -982,7 +998,6 @@ function rLoans(){
     }).join('');
   }
 
-  // Type-by-type view (used when filter is active)
   const sections=['deposit','loan_recv','loan_given'].map(type=>{
     if(loanF!=='all'&&loanF!==type)return'';
     const sc=sectionConfig[type];const tl=loans.filter(l=>l.type===type);
@@ -1025,7 +1040,6 @@ function closeModal(){document.getElementById('modal-overlay').classList.remove(
 function handleOvClick(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
 function toggleBal(){balHidden=!balHidden;renderMain();}
 function toggleNet(){netHidden=!netHidden;renderMain();}
-function toggleNet(){netHidden=!netHidden;renderMain();}
 
 // ADD TRANSACTION
 function openAddTx(){txType='expense';openModal(txModalHTML());}
@@ -1057,7 +1071,7 @@ function submitTx(){
   S.transactions.unshift(tx);save();closeModal();renderMain();
 }
 
-// TX DETAIL
+// FIX 2: Transaction Detail – Edit & Delete side by side, big Close button below
 function showTxD(id){
   const t=S.transactions.find(x=>x.id===id);if(!t)return;
   let icon,label,ac,pfx;
@@ -1065,8 +1079,26 @@ function showTxD(id){
   else if(t.type==='income'){const c=getCat('income',t.category);icon=catIco(t.category,32);label=c.label;ac='var(--green)';pfx='+';}
   else{icon=ico('wallet_type',32);label='Transfer';ac='var(--blue)';pfx='→';}
   const w=getWlt(t.wallet);
-  openModal(`<div class="modal-title">Transaction Detail</div><div style="text-align:center;padding:16px 0 20px;"><div style="display:flex;justify-content:center;margin-bottom:8px;opacity:.7;">${icon}</div><div style="font-size:13px;color:var(--text2);margin-bottom:6px;">${label}</div><div style="font-family:'Space Mono',monospace;font-size:34px;font-weight:700;color:${ac};">${pfx}${fmt(t.amount)}</div></div><div class="card" style="margin-bottom:16px;"><div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Date</span><span style="font-weight:700;margin-left:auto;">${fmtD(t.date)}</span></div><div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Type</span><span style="font-weight:700;margin-left:auto;text-transform:capitalize;">${t.type}</span></div><div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Wallet</span><span style="font-weight:700;margin-left:auto;">${w.name}</span></div>${t.type==='transfer'?`<div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">To Wallet</span><span style="font-weight:700;margin-left:auto;">${getWlt(t.toWallet).name}</span></div>`:''}<div class="tx-item" style="cursor:default;border-bottom:none;"><span style="color:var(--text3);">Note</span><span style="font-weight:700;margin-left:auto;">${t.note||'–'}</span></div></div><button class="btn btn-s" onclick="openEditTx('${t.id}')" style="margin-bottom:6px;">Edit Transaction</button><button class="btn btn-d" onclick="delTx('${t.id}')">Delete Transaction</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Close</button>`);
+  openModal(`<div class="modal-title">Transaction Detail</div>
+  <div style="text-align:center;padding:16px 0 20px;">
+    <div style="display:flex;justify-content:center;margin-bottom:8px;opacity:.7;">${icon}</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:6px;">${label}</div>
+    <div style="font-family:'Space Mono',monospace;font-size:34px;font-weight:700;color:${ac};">${pfx}${fmt(t.amount)}</div>
+  </div>
+  <div class="card" style="margin-bottom:18px;">
+    <div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Date</span><span style="font-weight:700;margin-left:auto;">${fmtD(t.date)}</span></div>
+    <div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Type</span><span style="font-weight:700;margin-left:auto;text-transform:capitalize;">${t.type}</span></div>
+    <div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">Wallet</span><span style="font-weight:700;margin-left:auto;">${w.name}</span></div>
+    ${t.type==='transfer'?`<div class="tx-item" style="cursor:default;"><span style="color:var(--text3);">To Wallet</span><span style="font-weight:700;margin-left:auto;">${getWlt(t.toWallet).name}</span></div>`:''}
+    <div class="tx-item" style="cursor:default;border-bottom:none;"><span style="color:var(--text3);">Note</span><span style="font-weight:700;margin-left:auto;">${t.note||'–'}</span></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+    <button class="btn btn-s" onclick="openEditTx('${t.id}')" style="margin:0;display:flex;align-items:center;justify-content:center;gap:7px;">${EDIT_SVG} Edit</button>
+    <button class="btn btn-d" onclick="delTx('${t.id}')" style="margin:0;display:flex;align-items:center;justify-content:center;gap:7px;">${TRASH_SVG} Delete</button>
+  </div>
+  <button class="btn btn-s" onclick="closeModal()" style="font-size:16px;font-weight:800;padding:15px;">Close</button>`);
 }
+
 function delTx(id){
   const t=S.transactions.find(x=>x.id===id);if(!t)return;
   if(!confirm('Delete this transaction? Wallet balance will be reversed.'))return;
@@ -1109,10 +1141,8 @@ function submitEditTx(id){
     if(!newAmt||newAmt<=0)return alert('Enter a valid amount.');
     if(!newW)return alert('Select a wallet.');
     if(!newCat)return alert('Select a category.');
-    // Reverse old wallet balance
     const oldW=S.wallets.find(x=>x.id===t.wallet);
     if(oldW){if(t.type==='expense')oldW.balance+=t.amount;else oldW.balance-=t.amount;}
-    // Apply new wallet balance
     const nW=S.wallets.find(x=>x.id===newW);
     if(nW){if(t.type==='expense')nW.balance-=newAmt;else nW.balance+=newAmt;}
     t.amount=newAmt;t.wallet=newW;t.category=newCat;
@@ -1196,15 +1226,8 @@ function submitBudgetOnly(period){
   const amt=parseFloat(document.getElementById('b-amt').value);
   if(!amt||amt<=0)return alert('Enter a valid amount.');
   const yr=curYear();
-  if(period==='monthly'){
-    const idx=S.budgets.findIndex(b=>b.category==='overall'&&b.month===S.month&&b.period!=='yearly');
-    if(idx>=0)S.budgets[idx].amount=amt;
-    else S.budgets.push({id:uid(),category:'overall',amount:amt,month:S.month,period:'monthly'});
-  }else{
-    const idx=S.budgets.findIndex(b=>b.category==='overall'&&b.year===yr&&b.period==='yearly');
-    if(idx>=0)S.budgets[idx].amount=amt;
-    else S.budgets.push({id:uid(),category:'overall',amount:amt,year:yr,period:'yearly'});
-  }
+  if(period==='monthly'){const idx=S.budgets.findIndex(b=>b.category==='overall'&&b.month===S.month&&b.period!=='yearly');if(idx>=0)S.budgets[idx].amount=amt;else S.budgets.push({id:uid(),category:'overall',amount:amt,month:S.month,period:'monthly'});}
+  else{const idx=S.budgets.findIndex(b=>b.category==='overall'&&b.year===yr&&b.period==='yearly');if(idx>=0)S.budgets[idx].amount=amt;else S.budgets.push({id:uid(),category:'overall',amount:amt,year:yr,period:'yearly'});}
   save();closeModal();renderMain();
 }
 
@@ -1212,15 +1235,8 @@ function submitSavingsOnly(period){
   const amt=parseFloat(document.getElementById('b-amt').value);
   if(!amt||amt<=0)return alert('Enter a valid amount.');
   const yr=curYear();
-  if(period==='monthly'){
-    const idx=S.budgets.findIndex(b=>b.category==='savings'&&b.month===S.month&&b.period==='monthly');
-    if(idx>=0)S.budgets[idx].amount=amt;
-    else S.budgets.push({id:uid(),category:'savings',amount:amt,month:S.month,period:'monthly'});
-  }else{
-    const idx=S.budgets.findIndex(b=>b.category==='savings'&&b.year===yr&&b.period==='yearly');
-    if(idx>=0)S.budgets[idx].amount=amt;
-    else S.budgets.push({id:uid(),category:'savings',amount:amt,year:yr,period:'yearly'});
-  }
+  if(period==='monthly'){const idx=S.budgets.findIndex(b=>b.category==='savings'&&b.month===S.month&&b.period==='monthly');if(idx>=0)S.budgets[idx].amount=amt;else S.budgets.push({id:uid(),category:'savings',amount:amt,month:S.month,period:'monthly'});}
+  else{const idx=S.budgets.findIndex(b=>b.category==='savings'&&b.year===yr&&b.period==='yearly');if(idx>=0)S.budgets[idx].amount=amt;else S.budgets.push({id:uid(),category:'savings',amount:amt,year:yr,period:'yearly'});}
   save();closeModal();renderMain();
 }
 
@@ -1259,13 +1275,22 @@ function submitBgtCat(){
   save();closeModal();renderMain();
 }
 
+/* FIX 3: showBgtTab uses .bgt-tab-btn class */
 function showBgtTab(tab){
-  const m=document.getElementById('bgt-monthly');const y=document.getElementById('bgt-yearly');const tm=document.getElementById('btab-m');const ty=document.getElementById('btab-y');
+  const m=document.getElementById('bgt-monthly');const y=document.getElementById('bgt-yearly');
+  const tm=document.getElementById('btab-m');const ty=document.getElementById('btab-y');
   if(!m||!y)return;
-  if(tab==='monthly'){m.style.display='';y.style.display='none';if(tm)tm.classList.add('active');if(ty)ty.classList.remove('active');}
-  else{m.style.display='none';y.style.display='';if(ty)ty.classList.add('active');if(tm)tm.classList.remove('active');}
+  if(tab==='monthly'){
+    m.style.display='';y.style.display='none';
+    if(tm)tm.classList.add('active');
+    if(ty)ty.classList.remove('active');
+  }else{
+    m.style.display='none';y.style.display='';
+    if(ty)ty.classList.add('active');
+    if(tm)tm.classList.remove('active');
+  }
 }
-  
+
 // LOANS
 function openAddLoan(prefill){
   const wOpts=S.wallets.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
@@ -1306,12 +1331,7 @@ function submitSubEntry(loanId){
   const nt=document.getElementById('se-nt').value.trim();
   if(!amt||amt<=0)return alert('Enter a valid amount.');
   if(!dt)return alert('Select a date.');
-  // Affect wallet
-  if(w){
-    const cfg=LOAN_TYPES[loan.type];
-    const wObj=S.wallets.find(x=>x.id===w);
-    if(wObj){if(cfg.walletDir==='in')wObj.balance+=amt;else wObj.balance-=amt;}
-  }
+  if(w){const cfg=LOAN_TYPES[loan.type];const wObj=S.wallets.find(x=>x.id===w);if(wObj){if(cfg.walletDir==='in')wObj.balance+=amt;else wObj.balance-=amt;}}
   if(!loan.extraEntries)loan.extraEntries=[];
   loan.extraEntries.push({id:uid(),amount:amt,wallet:w||'',date:dt,note:nt});
   save();closeModal();renderMain();
@@ -1320,11 +1340,7 @@ function delLoanSubEntry(loanId,idx){
   const loan=S.loans.find(l=>l.id===loanId);if(!loan)return;
   const e=(loan.extraEntries||[])[idx];if(!e)return;
   if(!confirm('Remove this entry? Wallet balance will be reversed if a wallet was linked.'))return;
-  if(e.wallet){
-    const cfg=LOAN_TYPES[loan.type];
-    const wObj=S.wallets.find(x=>x.id===e.wallet);
-    if(wObj){if(cfg.walletDir==='in')wObj.balance-=e.amount;else wObj.balance+=e.amount;}
-  }
+  if(e.wallet){const cfg=LOAN_TYPES[loan.type];const wObj=S.wallets.find(x=>x.id===e.wallet);if(wObj){if(cfg.walletDir==='in')wObj.balance-=e.amount;else wObj.balance+=e.amount;}}
   loan.extraEntries.splice(idx,1);save();renderMain();
 }
 function lnTypeChanged(){const tp=document.getElementById('ln-tp').value;const info=document.getElementById('ln-wallet-info');const msgs={deposit:'Taking a Deposit: money will be <b>added</b> to wallet (optional)',loan_recv:'Loan Received: money will be <b>added</b> to wallet (optional)',loan_given:'Loan Given: money will be <b>deducted</b> from wallet (optional)'};if(info)info.innerHTML=msgs[tp]||'';}
@@ -1402,7 +1418,7 @@ function doExport(){
   closeModal();
 }
 
-// MONTH NAVIGATION (fixed – timezone-safe)
+// MONTH NAVIGATION
 function changeMonth(d){
   const[y,m]=S.month.split('-').map(Number);
   let nm=m+d,ny=y;
