@@ -360,8 +360,8 @@ const DEFAULT_EXP_CATS=[
   {id:'education',label:'Education',icon:'📚'},{id:'entertainment',label:'Entertainment',icon:'🎮'},
   {id:'transportation',label:'Transportation',icon:'🚌'},{id:'food',label:'Food & Drinks',icon:'🍔'},
   {id:'health',label:'Health & Care',icon:'💊'},{id:'accommodation',label:'Accommodation',icon:'🏠'},
-  {id:'mobile',label:'Mobile Recharge',icon:'📱'},{id:'misc',label:'Miscellaneous',icon:'📦'},
-  {id:'clothing',label:'Clothing & Accessories',icon:'👕'},{id:'tech',label:'Technology',icon:'💻'},
+  {id:'mobile',label:'Mobile Recharge',icon:'📱'},{id:'misc',label:' Miscellaneous Expenses',icon:'📦'},
+  {id:'clothing',label:'Clothing & Accessories',icon:'👕'},{id:'tech',label:'Technology & Electronics and Electronics',icon:'💻'},
   {id:'travel',label:'Travel',icon:'✈️'},{id:'donation',label:'Donation',icon:'❤️'},
 ];
 const DEFAULT_INC_CATS=[
@@ -588,7 +588,7 @@ function rDash(){
     <!-- BALANCE CARD -->
     <div class="bal-card">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2px;">
-        <div class="bal-label">Yearly Balance · ${yr}${ys.sav>0?' (after savings)':''}</div>
+        <div class="bal-label">Yearly Balance · ${yr}${ys.sav>0?'  ':''}</div>
         <button onclick="toggleBal()" style="background:rgba(255,255,255,.07);border:none;border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--text2);display:flex;align-items:center;transition:all .2s;" title="${balHidden?'Show':'Hide'} balance">
           ${balHidden?ico('eye',15):ico('eye_off',15)}
         </button>
