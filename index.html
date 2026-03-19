@@ -74,8 +74,8 @@ body{font-family:'Outfit',sans-serif;background:#07090f;color:#e8edf5;min-height
 .nav-item.active .nav-pip{opacity:1;}
 
 /* FAB */
-.fab{position:fixed;bottom:calc(var(--nav) + 14px);right:18px;width:52px;height:52px;border-radius:16px;background:rgba(12,233,127,0.18);color:var(--green);border:1px solid rgba(12,233,127,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:99;box-shadow:0 4px 20px rgba(12,233,127,.2);transition:all .2s;animation:fabGlow 3s infinite;}
-@keyframes fabGlow{0%,100%{box-shadow:0 4px 20px rgba(12,233,127,.2),0 0 0 0 rgba(12,233,127,.1);}50%{box-shadow:0 4px 28px rgba(12,233,127,.3),0 0 0 8px rgba(12,233,127,0);}}
+.fab{position:fixed;bottom:calc(var(--nav) + 14px);right:18px;width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#0ce97f,#00c46a);color:#07090f;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:99;box-shadow:0 4px 20px rgba(12,233,127,.45);transition:all .2s;animation:fabGlow 3s infinite;}
+@keyframes fabGlow{0%,100%{box-shadow:0 4px 20px rgba(12,233,127,.45),0 0 0 0 rgba(12,233,127,.2);}50%{box-shadow:0 4px 28px rgba(12,233,127,.55),0 0 0 8px rgba(12,233,127,0);}}
 .fab:active{transform:scale(.92);}
 .fab svg{width:24px;height:24px;}
 
