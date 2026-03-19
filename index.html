@@ -74,8 +74,8 @@ body{font-family:'Outfit',sans-serif;background:#07090f;color:#e8edf5;min-height
 .nav-item.active .nav-pip{opacity:1;}
 
 /* FAB */
-.fab{position:fixed;bottom:calc(var(--nav) + 14px);right:18px;width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#0ce97f,#00c46a);color:#07090f;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:99;box-shadow:0 4px 20px rgba(12,233,127,.45);transition:all .2s;animation:fabGlow 3s infinite;}
-@keyframes fabGlow{0%,100%{box-shadow:0 4px 20px rgba(12,233,127,.45),0 0 0 0 rgba(12,233,127,.2);}50%{box-shadow:0 4px 28px rgba(12,233,127,.55),0 0 0 8px rgba(12,233,127,0);}}
+.fab{position:fixed;bottom:calc(var(--nav) + 14px);right:18px;width:52px;height:52px;border-radius:16px;background:rgba(12,233,127,0.18);color:var(--green);border:1px solid rgba(12,233,127,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:99;box-shadow:0 4px 20px rgba(12,233,127,.2);transition:all .2s;animation:fabGlow 3s infinite;}
+@keyframes fabGlow{0%,100%{box-shadow:0 4px 20px rgba(12,233,127,.2),0 0 0 0 rgba(12,233,127,.1);}50%{box-shadow:0 4px 28px rgba(12,233,127,.3),0 0 0 8px rgba(12,233,127,0);}}
 .fab:active{transform:scale(.92);}
 .fab svg{width:24px;height:24px;}
 
@@ -119,8 +119,7 @@ body{font-family:'Outfit',sans-serif;background:#07090f;color:#e8edf5;min-height
 .tx-amt{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;text-align:right;}
 .tx-dt{font-size:10px;color:var(--text3);text-align:right;margin-top:2px;}
 
-/* WALLET CARD */
-.wlt-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:15px 16px;display:flex;align-items:center;gap:13px;margin-bottom:10px;}
+/* WLT-CARD handled in WALLET DRAG REORDER section above */
 .wlt-ico{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0;}
 .wlt-bal{font-family:'Space Mono',monospace;font-size:17px;font-weight:700;}
 
@@ -183,8 +182,8 @@ select.fi{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='
 
 /* BUTTONS */
 .btn{width:100%;padding:13px;border-radius:13px;border:none;font-size:15px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s;margin-top:6px;}
-.btn-p{background:linear-gradient(135deg,#0ce97f,#00c46a);color:#07090f;}
-.btn-p:hover{opacity:.92;transform:translateY(-1px);}
+.btn-p{background:rgba(12,233,127,0.15);color:var(--green);border:1px solid rgba(12,233,127,0.35);}
+.btn-p:hover{background:rgba(12,233,127,0.22);border-color:rgba(12,233,127,0.55);transform:translateY(-1px);}
 .btn-d{background:var(--red-d);color:var(--red);border:1px solid rgba(255,61,90,.2);}
 .btn-s{background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
 
@@ -252,6 +251,13 @@ select.fi{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='
 .cat-list-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--borderl);}
 .cat-list-item:last-child{border-bottom:none;}
 
+/* WALLET DRAG REORDER */
+.wlt-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:15px 16px;display:flex;align-items:center;gap:13px;margin-bottom:10px;transition:opacity .2s,transform .2s;}
+.wlt-card.dragging{opacity:0.4;transform:scale(0.97);}
+.wlt-card.drag-over{border-color:rgba(77,159,255,0.5);background:rgba(77,159,255,0.06);}
+.drag-handle{cursor:grab;color:var(--text3);display:flex;align-items:center;padding:4px 2px;flex-shrink:0;touch-action:none;}
+.drag-handle:active{cursor:grabbing;}
+
 /* PWA INSTALL BANNER */
 #pwa-banner{display:none;position:fixed;bottom:calc(var(--nav) + 10px);left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:480px;background:linear-gradient(135deg,#0c1e14,#081420);border:1px solid rgba(12,233,127,.25);border-radius:16px;padding:13px 16px;z-index:98;box-shadow:0 8px 32px rgba(0,0,0,.5);}
 #pwa-banner.show{display:flex;align-items:center;gap:12px;animation:fadeUp .3s ease;}
@@ -274,6 +280,16 @@ select.fi{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='
   s.defer=true;
   document.head.appendChild(s);
   window.si=window.si||function(){(window.siq=window.siq||[]).push(arguments);};
+})();
+</script>
+<!-- Vercel Analytics -->
+<script>
+(function(){
+  var s=document.createElement('script');
+  s.src='https://cdn.vercel-insights.com/v1/analytics/script.js';
+  s.defer=true;
+  document.head.appendChild(s);
+  window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};
 })();
 </script>
 </head>
@@ -771,6 +787,7 @@ function doSearch(v){txQ=v;renderMain();setTimeout(()=>{const e=document.getElem
 // ============================================================
 function rWallets(){
   const trashSvg=TRASH_SVG;
+  const dragHandleSvg=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="8" x2="21" y2="8"/><line x1="3" y1="16" x2="21" y2="16"/></svg>`;
   return`
   <div class="section" style="padding-top:16px;">
     <div style="background:linear-gradient(135deg,#0d1420,#0a1422);border:1px solid rgba(77,159,255,.14);border-radius:18px;padding:20px;margin-bottom:14px;">
@@ -778,7 +795,9 @@ function rWallets(){
       <div style="font-family:'Space Mono',monospace;font-size:32px;font-weight:700;color:var(--blue);">${fmt(totalBal())}</div>
       <div style="font-size:12px;color:var(--text3);margin-top:4px;">${S.wallets.length} wallet${S.wallets.length!==1?'s':''}</div>
     </div>
-    ${S.wallets.map(w=>{const wt=WLT_TYPES.find(t=>t.id===w.type)||{id:'wallet',label:'Other'};return`<div class="wlt-card"><div class="wlt-ico" style="background:${w.color}22;color:${w.color};">${wltIco(wt.id,22)}</div><div style="flex:1;"><div style="font-size:15px;font-weight:700;">${w.name}</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">${wt.label}</div></div><div style="text-align:right;"><div class="wlt-bal" style="color:${w.balance>=0?'var(--text)':'var(--red)'};">${fmt(w.balance)}</div><div style="display:flex;gap:6px;margin-top:7px;justify-content:flex-end;"><button class="sm-btn" onclick="openEditWlt('${w.id}')">Edit</button><button class="del-btn" onclick="delWlt('${w.id}')">${trashSvg}</button></div></div></div>`;}).join('')}
+    <div id="wlt-list">
+    ${S.wallets.map((w,idx)=>{const wt=WLT_TYPES.find(t=>t.id===w.type)||{id:'wallet',label:'Other'};return`<div class="wlt-card" draggable="true" data-wid="${w.id}" data-idx="${idx}" ondragstart="wltDragStart(event)" ondragover="wltDragOver(event)" ondragleave="wltDragLeave(event)" ondrop="wltDrop(event)" ondragend="wltDragEnd(event)"><div class="drag-handle" title="Drag to reorder">${dragHandleSvg}</div><div class="wlt-ico" style="background:${w.color}22;color:${w.color};">${wltIco(wt.id,22)}</div><div style="flex:1;"><div style="font-size:15px;font-weight:700;">${w.name}</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">${wt.label}</div></div><div style="text-align:right;"><div class="wlt-bal" style="color:${w.balance>=0?'var(--text)':'var(--red)'};">${fmt(w.balance)}</div><div style="display:flex;gap:6px;margin-top:7px;justify-content:flex-end;"><button class="sm-btn" onclick="openEditWlt('${w.id}')">Edit</button><button class="del-btn" onclick="delWlt('${w.id}')">${trashSvg}</button></div></div></div>`;}).join('')}
+    </div>
     <button class="btn btn-s" onclick="openAddWlt()" style="margin-top:4px;">+ Add Wallet</button>
   </div>`;
 }
@@ -1229,9 +1248,11 @@ function openEditBgt(bgtId){
   </div>
   <div class="fg"><label class="fl">${isSavings?'Target':'New'} Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="b-edit-amt" placeholder="0.00" min="0" value="${b.amount}"></div></div>
   ${calcHTML}
-  <button class="btn btn-p" onclick="submitEditBgt('${bgtId}')">Update</button>
-  <button class="btn btn-d" onclick="delBgt('${bgtId}')" style="margin-top:8px;">Delete ${isSavings?'Savings Target':'Budget'}</button>
-  <button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
+    <button class="btn btn-p" onclick="submitEditBgt('${bgtId}')" style="margin:0;">Update</button>
+    <button class="btn btn-d" onclick="delBgt('${bgtId}')" style="margin:0;">Delete</button>
+  </div>
+  <button class="btn btn-s" onclick="closeModal()" style="margin-top:10px;font-size:16px;font-weight:800;padding:15px;">Close</button>`);
 }
 
 // CHANGE 4: Calculator apply function
@@ -1510,6 +1531,38 @@ function changeMonth(d){
 }
 function openMonthPicker(){openModal(`<div class="modal-title">Select Month</div><div class="fg"><input type="month" class="fi" id="mp-val" value="${S.month}"></div><button class="btn btn-p" onclick="applyMonth()">Apply</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);}
 function applyMonth(){const v=document.getElementById('mp-val').value;if(v){S.month=v;save();closeModal();renderMain();}}
+
+// ============================================================
+// WALLET DRAG-AND-DROP REORDER
+// ============================================================
+let wltDragSrcId=null;
+function wltDragStart(e){
+  wltDragSrcId=e.currentTarget.dataset.wid;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain',wltDragSrcId);
+}
+function wltDragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  const card=e.currentTarget;
+  if(card.dataset.wid!==wltDragSrcId)card.classList.add('drag-over');
+}
+function wltDragLeave(e){e.currentTarget.classList.remove('drag-over');}
+function wltDragEnd(e){
+  document.querySelectorAll('.wlt-card').forEach(el=>{el.classList.remove('dragging','drag-over');});
+}
+function wltDrop(e){
+  e.preventDefault();
+  const targetId=e.currentTarget.dataset.wid;
+  if(!wltDragSrcId||wltDragSrcId===targetId)return;
+  const srcIdx=S.wallets.findIndex(w=>w.id===wltDragSrcId);
+  const tgtIdx=S.wallets.findIndex(w=>w.id===targetId);
+  if(srcIdx<0||tgtIdx<0)return;
+  const [moved]=S.wallets.splice(srcIdx,1);
+  S.wallets.splice(tgtIdx,0,moved);
+  save();renderMain();
+}
 
 // ============================================================
 // INIT
