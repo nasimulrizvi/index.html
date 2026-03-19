@@ -1120,7 +1120,7 @@ function openEditTx(id){
     <div style="background:var(--blue-d);border:1px solid rgba(77,159,255,.2);border-radius:10px;padding:9px 12px;margin-bottom:14px;font-size:12px;color:var(--blue);">Only date and note can be edited for transfers.</div>
     <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="et-dt" value="${t.date}"></div>
     <div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="et-note" value="${t.note||''}"></div>
-    <button class="btn btn-p" onclick="submitEditTx('${id}')">Update</button>
+    <button class="btn btn-update" onclick="submitEditTx('${id}')">Update</button>
     <button class="btn btn-s" onclick="showTxD('${id}')" style="margin-top:8px;">← Back</button>`);
     return;
   }
@@ -1131,8 +1131,8 @@ function openEditTx(id){
   <div class="fg"><label class="fl">Category</label><select class="fi" id="et-cat">${catOpts}</select></div>
   <div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="et-amt" value="${t.amount}" min="0" step="0.01"></div></div>
   <div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="et-note" value="${t.note||''}" placeholder="What was this for?"></div>
-  <button class="btn btn-p" onclick="submitEditTx('${id}')">Update</button>
-  <button class="btn btn-s" onclick="showTxD('${id}')" style="margin-top:8px;">← Back</button>`);
+  <button class="btn btn-update" onclick="submitEditTx('${id}')">Update</button>
+  <button class="btn btn-s" onclick="showTxD('${id}')" style="margin-top:8px;">Back</button>`);
 }
 function submitEditTx(id){
   const t=S.transactions.find(x=>x.id===id);if(!t)return;
@@ -1154,7 +1154,7 @@ function submitEditTx(id){
 }
 function openManageCats(type){
   const isExp=type==='expense';const customs=isExp?S.customExpCats:S.customIncCats;
-  openModal(`<div class="modal-title">Manage ${isExp?'Expense':'Income'} Categories</div><div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Default categories cannot be deleted.</div><div class="card" style="margin-bottom:16px;">${(isExp?DEFAULT_EXP_CATS:DEFAULT_INC_CATS).map(c=>`<div class="cat-list-item"><span>${c.icon} ${c.label}</span><span style="font-size:10px;color:var(--text3);">Default</span></div>`).join('')}${customs.map((c,i)=>`<div class="cat-list-item"><span>${c.icon} ${c.label}</span><button class="del-btn" style="width:24px;height:24px;font-size:12px;" onclick="delCustomCat('${type}',${i})">×</button></div>`).join('')}</div><div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.8px;">Add Custom Category</div><div style="display:flex;gap:8px;margin-bottom:10px;"><input type="text" class="fi" id="nc-icon" placeholder="Emoji" style="width:60px;text-align:center;padding:11px 8px;"><input type="text" class="fi" id="nc-name" placeholder="Category name" style="flex:1;"></div><button class="btn btn-p" onclick="addCustomCat('${type}')">Add Category</button><button class="btn btn-s" onclick="openAddTx()" style="margin-top:8px;">← Back</button>`);
+  openModal(`<div class="modal-title">Manage ${isExp?'Expense':'Income'} Categories</div><div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Default categories cannot be deleted.</div><div class="card" style="margin-bottom:16px;">${(isExp?DEFAULT_EXP_CATS:DEFAULT_INC_CATS).map(c=>`<div class="cat-list-item"><span>${c.icon} ${c.label}</span><span style="font-size:10px;color:var(--text3);">Default</span></div>`).join('')}${customs.map((c,i)=>`<div class="cat-list-item"><span>${c.icon} ${c.label}</span><button class="del-btn" style="width:24px;height:24px;font-size:12px;" onclick="delCustomCat('${type}',${i})">×</button></div>`).join('')}</div><div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.8px;">Add Custom Category</div><div style="display:flex;gap:8px;margin-bottom:10px;"><input type="text" class="fi" id="nc-icon" placeholder="Emoji" style="width:60px;text-align:center;padding:11px 8px;"><input type="text" class="fi" id="nc-name" placeholder="Category name" style="flex:1;"></div><button class="btn btn-update" onclick="addCustomCat('${type}')">Add Category</button><button class="btn btn-s" onclick="openAddTx()" style="margin-top:8px;">← Back</button>`);
 }
 function addCustomCat(type){const icon=document.getElementById('nc-icon').value.trim()||'📌';const label=document.getElementById('nc-name').value.trim();if(!label)return alert('Enter a category name.');const c={id:'custom_'+uid(),label,icon};if(type==='expense')S.customExpCats.push(c);else S.customIncCats.push(c);save();openManageCats(type);}
 function delCustomCat(type,idx){if(!confirm('Delete this category?'))return;if(type==='expense')S.customExpCats.splice(idx,1);else S.customIncCats.splice(idx,1);save();openManageCats(type);}
@@ -1164,7 +1164,7 @@ function openAddWlt(){editWltId='';selColor=COLORS[0];showWltModal();}
 function openEditWlt(id){editWltId=id;const w=S.wallets.find(x=>x.id===id);selColor=w?w.color:COLORS[0];showWltModal();}
 function showWltModal(){
   const e=editWltId?S.wallets.find(x=>x.id===editWltId):null;
-  openModal(`<div class="modal-title">${e?'Edit':'Add'} Wallet</div><div class="fg"><label class="fl">Name</label><input type="text" class="fi" id="w-nm" placeholder="e.g. bKash Main" value="${e?e.name:''}"></div><div class="fg"><label class="fl">Type</label><select class="fi" id="w-tp">${wltTypeOpts(e?e.type:'')}</select></div><div class="fg"><label class="fl">${e?'Current':'Initial'} Balance (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="w-bal" placeholder="0.00" value="${e?e.balance:0}"></div></div><div class="fg"><label class="fl">Color</label><div class="col-picker">${COLORS.map(c=>`<div class="col-swatch${selColor===c?' sel':''}" style="background:${c};" onclick="pickCol('${c}')" data-c="${c}"></div>`).join('')}</div></div><button class="btn btn-p" onclick="submitWlt()">${e?'Update':'Add'} Wallet</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+  openModal(`<div class="modal-title">${e?'Edit':'Add'} Wallet</div><div class="fg"><label class="fl">Name</label><input type="text" class="fi" id="w-nm" placeholder="e.g. bKash Main" value="${e?e.name:''}"></div><div class="fg"><label class="fl">Type</label><select class="fi" id="w-tp">${wltTypeOpts(e?e.type:'')}</select></div><div class="fg"><label class="fl">${e?'Current':'Initial'} Balance (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="w-bal" placeholder="0.00" value="${e?e.balance:0}"></div></div><div class="fg"><label class="fl">Color</label><div class="col-picker">${COLORS.map(c=>`<div class="col-swatch${selColor===c?' sel':''}" style="background:${c};" onclick="pickCol('${c}')" data-c="${c}"></div>`).join('')}</div></div><button class="btn btn-update" onclick="submitWlt()">${e?'Update':'Add'} Wallet</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
 function pickCol(c){selColor=c;document.querySelectorAll('.col-swatch').forEach(el=>el.classList.toggle('sel',el.dataset.c===c));}
 function submitWlt(){
@@ -1189,26 +1189,26 @@ function openAddBgt(pre){
   <div class="fg" id="b-cat-wrap" style="${(!pre||pre==='category')?'':'display:none;'}"><label class="fl">Category</label><select class="fi" id="b-cat">${getExpCats().map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}</select></div>
   <div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="b-amt" placeholder="0.00" min="0"></div></div>
   <div id="b-hint" style="font-size:12px;color:var(--text3);margin-bottom:14px;">Applies to ${fmtMY(S.month)}</div>
-  <button class="btn btn-p" onclick="submitBgt()">Save</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+  <button class="btn btn-update" onclick="submitBgt()">Save</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
 
 function openAddBudgetModal(period){
   openModal(`<div class="modal-title">Set ${period==='monthly'?'Monthly':'Yearly'} Budget</div>
   <div class="fg"><label class="fl">Amount (৳) · ${period==='monthly'?fmtMY(S.month):curYear()}</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="b-amt" placeholder="0.00" min="0"></div></div>
-  <button class="btn btn-p" onclick="submitBudgetOnly('${period}')">Save</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+  <button class="btn btn-update" onclick="submitBudgetOnly('${period}')">Save</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
 
 function openAddSavingsModal(period){
   openModal(`<div class="modal-title">Set ${period==='monthly'?'Monthly':'Yearly'} Savings Target</div>
   <div class="fg"><label class="fl">Target Amount (৳) · ${period==='monthly'?fmtMY(S.month):curYear()}</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="b-amt" placeholder="0.00" min="0"></div></div>
-  <button class="btn btn-p" onclick="submitSavingsOnly('${period}')">Save</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+  <button class="btn btn-update" onclick="submitSavingsOnly('${period}')">Save</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
 
 function openAddBgtCat(catId){
   openModal(`<div class="modal-title">Set Category Budget</div>
   <div class="fg"><label class="fl">Category</label><select class="fi" id="b-cat">${getExpCats().map(c=>`<option value="${c.id}" ${c.id===catId?'selected':''}>${c.label}</option>`).join('')}</select></div>
   <div class="fg"><label class="fl">Amount (৳) · ${fmtMY(S.month)}</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="b-amt" placeholder="0.00" min="0"></div></div>
-  <button class="btn btn-p" onclick="submitBgtCat()">Save</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+  <button class="btn btn-update" onclick="submitBgtCat()">Save</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
 
 // ============================================================
@@ -1327,7 +1327,7 @@ function openAddLoan(prefill){
     <option value="deposit" ${pf.type==='deposit'?'selected':''}>Taking a Deposit</option>
     <option value="loan_recv" ${pf.type==='loan_recv'?'selected':''}>Loan Received</option>
     <option value="loan_given" ${pf.type==='loan_given'?'selected':''}>Loan Given</option>
-  </select></div><div id="ln-wallet-info" style="font-size:12px;background:var(--blue-d);border:1px solid rgba(77,159,255,.2);border-radius:10px;padding:9px 12px;margin-bottom:14px;color:var(--blue);">Taking a Deposit: money will be <b>added</b> to wallet</div><div class="fg"><label class="fl">Person / Organization</label><input type="text" class="fi" id="ln-pr" placeholder="Name" value="${pf.person||''}"></div><div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="ln-amt" placeholder="0.00" min="0"></div></div><div class="fg"><label class="fl">Wallet (optional)</label><select class="fi" id="ln-w"><option value="">Select a wallet</option>${wOpts}</select></div><div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="ln-dt" value="${todayD()}"></div><div class="fg"><label class="fl">Due Date (optional)</label><input type="date" class="fi" id="ln-dd"></div><div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="ln-nt" placeholder="Additional details"></div><button class="btn btn-p" onclick="submitLoan()">Add Record</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+  </select></div><div id="ln-wallet-info" style="font-size:12px;background:var(--blue-d);border:1px solid rgba(77,159,255,.2);border-radius:10px;padding:9px 12px;margin-bottom:14px;color:var(--blue);">Taking a Deposit: money will be <b>added</b> to wallet</div><div class="fg"><label class="fl">Person / Organization</label><input type="text" class="fi" id="ln-pr" placeholder="Name" value="${pf.person||''}"></div><div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="ln-amt" placeholder="0.00" min="0"></div></div><div class="fg"><label class="fl">Wallet (optional)</label><select class="fi" id="ln-w"><option value="">Select a wallet</option>${wOpts}</select></div><div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="ln-dt" value="${todayD()}"></div><div class="fg"><label class="fl">Due Date (optional)</label><input type="date" class="fi" id="ln-dd"></div><div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="ln-nt" placeholder="Additional details"></div><button class="btn btn-update" onclick="submitLoan()">Add Record</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
 
 function openAddSubEntry(loanId){
@@ -1343,7 +1343,7 @@ function openAddSubEntry(loanId){
   <div class="fg"><label class="fl">Wallet <span style="color:var(--text3);text-transform:none;letter-spacing:0;font-weight:500;">(optional)</span></label><select class="fi" id="se-w"><option value="">-- No wallet --</option>${wOpts}</select></div>
   <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="se-dt" value="${todayD()}"></div>
   <div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="se-nt" placeholder="e.g. second installment"></div>
-  <button class="btn btn-p" onclick="submitSubEntry('${loanId}')">Add to Record</button>
+  <button class="btn btn-update" onclick="submitSubEntry('${loanId}')">Add to Record</button>
   <button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
 function submitSubEntry(loanId){
@@ -1377,7 +1377,7 @@ function openAddLoanPayment(loanId){
   const loan=S.loans.find(l=>l.id===loanId);if(!loan)return;
   const cfg=LOAN_TYPES[loan.type];const remain=loanRemain(loan);
   const wOpts=S.wallets.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
-  openModal(`<div class="modal-title">${cfg.childLabel}</div><div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:16px;"><div style="font-size:12px;color:var(--text3);">Original: <b style="color:var(--text);">${fmt(loan.amount)}</b> · <b style="color:var(--text);">${loan.person}</b></div><div style="font-size:12px;color:var(--text3);margin-top:4px;">Remaining: <b style="color:var(--red);">${fmt(remain)}</b></div></div><div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="lp-amt" placeholder="${remain.toFixed(2)}" min="0" max="${remain}" value="${remain.toFixed(2)}"></div></div><div class="fg"><label class="fl">Wallet <span style="color:var(--text3);text-transform:none;letter-spacing:0;font-weight:500;">(optional)</span></label><select class="fi" id="lp-w"><option value="">-- No wallet --</option>${wOpts}</select></div><div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="lp-dt" value="${todayD()}"></div><div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="lp-nt" placeholder="Payment note"></div><button class="btn btn-p" onclick="submitLoanPayment('${loanId}')">Record Payment</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
+  openModal(`<div class="modal-title">${cfg.childLabel}</div><div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:16px;"><div style="font-size:12px;color:var(--text3);">Original: <b style="color:var(--text);">${fmt(loan.amount)}</b> · <b style="color:var(--text);">${loan.person}</b></div><div style="font-size:12px;color:var(--text3);margin-top:4px;">Remaining: <b style="color:var(--red);">${fmt(remain)}</b></div></div><div class="fg"><label class="fl">Amount (৳)</label><div class="amt-wrap"><span class="amt-pre">৳</span><input type="number" class="fi amt-fi" id="lp-amt" placeholder="${remain.toFixed(2)}" min="0" max="${remain}" value="${remain.toFixed(2)}"></div></div><div class="fg"><label class="fl">Wallet <span style="color:var(--text3);text-transform:none;letter-spacing:0;font-weight:500;">(optional)</span></label><select class="fi" id="lp-w"><option value="">-- No wallet --</option>${wOpts}</select></div><div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="lp-dt" value="${todayD()}"></div><div class="fg"><label class="fl">Note (optional)</label><input type="text" class="fi" id="lp-nt" placeholder="Payment note"></div><button class="btn btn-update" onclick="submitLoanPayment('${loanId}')">Record Payment</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);
 }
 function submitLoanPayment(loanId){
   const loan=S.loans.find(l=>l.id===loanId);if(!loan)return;
@@ -1481,7 +1481,7 @@ function changeMonth(d){
   if(nm>12){nm=1;ny++;}if(nm<1){nm=12;ny--;}
   S.month=`${ny}-${String(nm).padStart(2,'0')}`;save();renderMain();
 }
-function openMonthPicker(){openModal(`<div class="modal-title">Select Month</div><div class="fg"><input type="month" class="fi" id="mp-val" value="${S.month}"></div><button class="btn btn-p" onclick="applyMonth()">Apply</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);}
+function openMonthPicker(){openModal(`<div class="modal-title">Select Month</div><div class="fg"><input type="month" class="fi" id="mp-val" value="${S.month}"></div><button class="btn btn-update" onclick="applyMonth()">Apply</button><button class="btn btn-s" onclick="closeModal()" style="margin-top:8px;">Cancel</button>`);}
 function applyMonth(){const v=document.getElementById('mp-val').value;if(v){S.month=v;save();closeModal();renderMain();}}
 
 // ============================================================
