@@ -346,6 +346,22 @@ const SUPA_URL = 'https://rftsttadifjjoagnvker.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmdHN0dGFkaWZqam9hZ252a2VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNjA1NTMsImV4cCI6MjA4OTczNjU1M30.XMgLbj5T8cd9MTp1HJ8AZAa_mnLTxjJYqnC31dptAOs';
 const supa = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 let sbUser = null;
+const _bc = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('ntx_sync') : null;
+if(_bc) _bc.onmessage = (e) => {
+  if(e.data&&e.data.type==='sync'&&e.data.ts>( S.lastSync||0)){
+    const d=e.data;
+    S.transactions=d.transactions||S.transactions;
+    S.wallets=d.wallets||S.wallets;
+    S.budgets=d.budgets||S.budgets;
+    S.loans=d.loans||S.loans;
+    S.customExpCats=d.customExpCats||S.customExpCats||[];
+    S.customIncCats=d.customIncCats||S.customIncCats||[];
+    S.expCatOrder=d.expCatOrder||S.expCatOrder||[];
+    S.incCatOrder=d.incCatOrder||S.incCatOrder||[];
+    S.lastSync=d.ts;
+    saveLocal();setSyncDot('ok');renderMain();
+  }
+};
 
 // ============ PWA ============
 (function(){
@@ -506,6 +522,7 @@ async function pushSync(){
     const{error}=await supa.from('ntx_data').upsert(payload,{onConflict:'user_id'});
     if(error)throw error;
     S.lastSync=ts;saveLocal();setSyncDot('ok');
+    if(_bc)_bc.postMessage({type:'sync',transactions:S.transactions,wallets:S.wallets,budgets:S.budgets,loans:S.loans,customExpCats:S.customExpCats||[],customIncCats:S.customIncCats||[],expCatOrder:S.expCatOrder||[],incCatOrder:S.incCatOrder||[],ts});
   }catch(e){setSyncDot('err');clearTimeout(syncTimeout);syncTimeout=setTimeout(pushSync,4000);}
 }
 async function pullSync(){
