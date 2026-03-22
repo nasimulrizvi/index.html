@@ -239,6 +239,15 @@ select.fi{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='
 .wlt-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:15px 16px;display:flex;align-items:center;gap:13px;margin-bottom:10px;}
 .drag-handle{cursor:grab;color:var(--text3);display:flex;align-items:center;padding:4px 2px;flex-shrink:0;touch-action:none;}
 .drag-handle:active{cursor:grabbing;}
+.hist-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.hist-card:hover{background:rgba(255,255,255,.05);}
+.hist-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.hist-section{margin-top:20px;}
+.hist-toggle{display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 0;user-select:none;}
+.hist-toggle-line{flex:1;height:1px;background:var(--borderl);}
+.hist-toggle-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3);white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.hist-toggle-chevron{transition:transform .2s;color:var(--text3);}
+.hist-toggle-chevron.open{transform:rotate(180deg);}
 .wlt-card.dragging{opacity:0.4;transform:scale(0.97);}
 .wlt-card.drag-over{border-color:rgba(77,159,255,0.5);background:rgba(77,159,255,0.06);}
 #pwa-banner{display:none;position:fixed;bottom:calc(var(--nav) + 10px);left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:480px;background:linear-gradient(135deg,#0c1e14,#081420);border:1px solid rgba(12,233,127,.25);border-radius:16px;padding:13px 16px;z-index:98;box-shadow:0 8px 32px rgba(0,0,0,.5);}
@@ -620,6 +629,31 @@ function catIncomeAll(m){const map={};mTxs(m).filter(t=>t.type==='income').forEa
 function loanTotal(l){return l.amount+(l.extraEntries||[]).reduce((s,e)=>s+e.amount,0);}
 function loanPaid(l){return(l.payments||[]).reduce((s,p)=>s+p.amount,0);}
 function loanRemain(l){return loanTotal(l)-loanPaid(l);}
+function getLoanStatusLabel(l){
+  const remain=loanRemain(l);
+  const hasExtras=(l.extraEntries||[]).length>0;
+  const hasPay=(l.payments||[]).length>0;
+  const settled=remain<=0&&hasPay;
+  if(l.type==='loan_given'){
+    if(settled)return'Full Loan Payment';
+    if(hasPay)return'Partial Loan Payment';
+    if(hasExtras)return'Additional Loan Taken';
+    return'Loan Given';
+  }
+  if(l.type==='loan_recv'){
+    if(settled)return'Loan Fully Repaid';
+    if(hasPay)return'Loan Partially Repaid';
+    if(hasExtras)return'Additional Loan Received';
+    return'Loan Received';
+  }
+  if(l.type==='deposit'){
+    if(settled)return'Deposit Fully Returned';
+    if(hasPay)return'Deposit Partially Returned';
+    if(hasExtras)return'Deposit Increased';
+    return'Deposit Received';
+  }
+  return'Unknown';
+}
 function curYear(){return S.month.slice(0,4);}
 function getSavingsBgt(period,key){if(period==='yearly')return S.budgets.find(b=>b.category==='savings'&&b.year===key&&b.period==='yearly');return S.budgets.find(b=>b.category==='savings'&&b.month===key&&b.period==='monthly');}
 
@@ -839,25 +873,46 @@ function rBudget(){
 // ============ LOANS ============
 function rLoans(){
   const sC={deposit:{title:'Deposits',acol:'blue'},loan_recv:{title:'Loans Received',acol:'amber'},loan_given:{title:'Loans Given',acol:'green'}};
-  let loans=[...S.loans].sort((a,b)=>b.date.localeCompare(a.date));
-  if(loanF!=='all')loans=loans.filter(l=>l.type===loanF);
+  let allLoans=[...S.loans].sort((a,b)=>b.date.localeCompare(a.date));
+  const activeLoans=allLoans.filter(l=>loanRemain(l)>0);
+  const settledLoans=allLoans.filter(l=>loanRemain(l)<=0);
+  let loans=loanF==='all'?activeLoans:activeLoans.filter(l=>l.type===loanF);
+  let histLoans=loanF==='all'?settledLoans:settledLoans.filter(l=>l.type===loanF);
   const iOwe=S.loans.filter(l=>l.type==='loan_recv'&&loanRemain(l)>0).reduce((s,l)=>s+loanRemain(l),0);
   const owesMe=S.loans.filter(l=>l.type==='loan_given'&&loanRemain(l)>0).reduce((s,l)=>s+loanRemain(l),0);
   const depPend=S.loans.filter(l=>l.type==='deposit'&&loanRemain(l)>0).reduce((s,l)=>s+loanRemain(l),0);
+
   function extraHTML(l,sc){
-    const extras=l.extraEntries||[];if(!extras.length)return'';
-    const rows=extras.map((e,i)=>'<div class="loan-pay-item"><span style="display:flex;align-items:center;gap:4px;">'+CAL_SVG+' '+fmtD(e.date)+(e.note?' - '+e.note:'')+(e.wallet?' '+WAL_SVG+' '+getWlt(e.wallet).name:'')+'</span><div style="display:flex;align-items:center;gap:8px;"><span style="font-family:\'Space Mono\',monospace;font-weight:700;color:var(--'+sc.acol+');">+'+fmt(e.amount)+'</span><button class="del-btn" style="width:22px;height:22px;font-size:11px;" onclick="delLoanSubEntry(\''+l.id+'\','+i+')">x</button></div></div>').join('');
-    return'<div style="border-top:1px solid var(--borderl);margin-top:10px;padding-top:10px;"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:6px;">Additional Entries</div>'+rows+'<div style="font-size:12px;font-weight:700;color:var(--text2);margin-top:8px;padding-top:8px;border-top:1px solid var(--borderl);display:flex;justify-content:space-between;"><span>Total</span><span style="font-family:\'Space Mono\',monospace;color:var(--'+sc.acol+');">'+fmt(loanTotal(l))+'</span></div></div>';
+    const extras=l.extraEntries||[];
+    if(!extras.length)return'';
+    const rows=extras.map((e,i)=>{
+      const fn="delLoanSubEntry('"+l.id+"',"+i+")";
+      const smStyle="font-family:'Space Mono',monospace;font-weight:700;color:var(--"+sc.acol+")";
+      return'<div class="loan-pay-item"><span style="display:flex;align-items:center;gap:4px;">'+CAL_SVG+' '+fmtD(e.date)+(e.note?' - '+e.note:'')+(e.wallet?' '+WAL_SVG+' '+getWlt(e.wallet).name:'')+'</span><div style="display:flex;align-items:center;gap:8px;"><span style="'+smStyle+';">+'+fmt(e.amount)+'</span><button class="del-btn" style="width:22px;height:22px;font-size:11px;" onclick="'+fn+'">x</button></div></div>';
+    }).join('');
+    const smStyle2="font-family:'Space Mono',monospace;color:var(--"+sc.acol+")";
+    return'<div style="border-top:1px solid var(--borderl);margin-top:10px;padding-top:10px;"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:6px;">Additional Entries</div>'+rows+'<div style="font-size:12px;font-weight:700;color:var(--text2);margin-top:8px;padding-top:8px;border-top:1px solid var(--borderl);display:flex;justify-content:space-between;"><span>Total</span><span style="'+smStyle2+';">'+fmt(loanTotal(l))+'</span></div></div>';
   }
+
   function lCard(l){
     const cfg=LOAN_TYPES[l.type];const sc=sC[l.type];
+    const statusLabel=getLoanStatusLabel(l);
     const total=loanTotal(l);const paid=loanPaid(l);const remain=loanRemain(l);
     const extras=l.extraEntries||[];const pct=total>0?Math.min(100,(paid/total)*100):0;
+    const _smCss="font-family:'Space Mono',monospace";
+    const extrasDiv=extras.length?('<div style="'+_smCss+';font-size:15px;font-weight:700;color:var(--'+sc.acol+');margin-top:4px;">'+fmt(total)+'</div><div style="font-size:10px;color:var(--text3);">Total</div>'):'';
     const pcol=remain<=0?'var(--green)':pct>50?'var(--amber)':'var(--red)';
     const lIcCol=l.type==='deposit'?'#4d9fff':l.type==='loan_recv'?'#ffb020':'#9d6fff';
-    const payH=(l.payments&&l.payments.length)?'<div class="loan-payments"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:7px;">Payment History</div>'+l.payments.map((p,i)=>'<div class="loan-pay-item"><span style="display:flex;align-items:center;gap:4px;">'+CAL_SVG+' '+fmtD(p.date)+(p.note?' - '+p.note:'')+(p.wallet?' '+WAL_SVG+' '+getWlt(p.wallet).name:'')+'</span><div style="display:flex;align-items:center;gap:8px;"><span style="font-family:\'Space Mono\',monospace;font-weight:700;color:var(--green);">'+fmt(p.amount)+'</span><button class="del-btn" style="width:22px;height:22px;font-size:11px;" onclick="delLoanPayment(\''+l.id+'\','+i+')">x</button></div></div>').join('')+'</div>':'';
+    const payH=(l.payments&&l.payments.length)?(()=>{
+      const smG="font-family:'Space Mono',monospace;font-weight:700;color:var(--green)";
+      const pRows=l.payments.map((p,i)=>{
+        const df="delLoanPayment('"+l.id+"',"+i+")";
+        return'<div class="loan-pay-item"><span style="display:flex;align-items:center;gap:4px;">'+CAL_SVG+' '+fmtD(p.date)+(p.note?' - '+p.note:'')+(p.wallet?' '+WAL_SVG+' '+getWlt(p.wallet).name:'')+'</span><div style="display:flex;align-items:center;gap:8px;"><span style="'+smG+';">'+fmt(p.amount)+'</span><button class="del-btn" style="width:22px;height:22px;font-size:11px;" onclick="'+df+'">x</button></div></div>';
+      }).join('');
+      return'<div class="loan-payments"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:7px;">Payment History</div>'+pRows+'</div>';
+    })():''
     return`<div class="loan-card"><div class="loan-hdr"><div>
-      <div style="display:flex;align-items:center;gap:10px;"><div style="width:42px;height:42px;border-radius:12px;background:${lIcCol}22;display:flex;align-items:center;justify-content:center;color:${lIcCol};flex-shrink:0;">${loanIco(l.type,20)}</div><div><div class="loan-person">${l.person}</div><span class="loan-type-badge" style="background:var(--${sc.acol}-d);color:var(--${sc.acol});">${cfg.label}</span></div></div>
+      <div style="display:flex;align-items:center;gap:10px;"><div style="width:42px;height:42px;border-radius:12px;background:${lIcCol}22;display:flex;align-items:center;justify-content:center;color:${lIcCol};flex-shrink:0;">${loanIco(l.type,20)}</div><div><div class="loan-person">${l.person}</div><span class="loan-type-badge" style="background:var(--${sc.acol}-d);color:var(--${sc.acol});">${statusLabel}</span></div></div>
       <div style="font-size:11px;color:var(--text3);margin-top:9px;display:flex;align-items:center;gap:5px;">${CAL_SVG} ${fmtD(l.date)}${l.dueDate?' - Due: '+fmtD(l.dueDate):''}</div>
       ${l.note?'<div style="font-size:11px;color:var(--text3);margin-top:3px;">'+l.note+'</div>':''}
       <div style="font-size:11px;color:var(--text3);margin-top:3px;display:flex;align-items:center;gap:5px;">${WAL_SVG} ${l.wallet?getWlt(l.wallet).name:'No wallet linked'}</div>
@@ -865,49 +920,110 @@ function rLoans(){
     <div style="text-align:right;flex-shrink:0;">
       <div style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--${sc.acol});">${fmt(l.amount)}</div>
       <div style="font-size:10px;color:var(--text3);margin-top:2px;">${extras.length?'Initial':'Amount'}</div>
-      ${extras.length?'<div style="font-family:\'Space Mono\',monospace;font-size:15px;font-weight:700;color:var(--'+sc.acol+');margin-top:4px;">'+fmt(total)+'</div><div style="font-size:10px;color:var(--text3);">Total</div>':''}
-      ${remain>0?'<div style="font-family:\'Space Mono\',monospace;font-size:14px;font-weight:700;color:var(--red);margin-top:6px;">'+fmt(remain)+'</div><div style="font-size:10px;color:var(--text3);">Remaining</div>':'<div style="font-size:12px;color:var(--green);font-weight:700;margin-top:6px;display:flex;align-items:center;gap:4px;justify-content:flex-end;">'+ico('check',13,'#0ce97f')+' Settled</div>'}
+      ${extrasDiv}
+      <div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--red);margin-top:6px;">${fmt(remain)}</div><div style="font-size:10px;color:var(--text3);">Remaining</div>
     </div></div>
     ${extraHTML(l,sc)}
     <div class="loan-prog-wrap"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px;"><span>Paid ${fmt(paid)} of ${fmt(total)}</span><span style="color:${pcol};font-weight:700;">${pct.toFixed(0)}%</span></div><div class="prog" style="height:8px;"><div class="prog-fill" style="width:${pct}%;background:${pcol};"></div></div></div>
     ${payH}
     <div class="loan-actions">
-      ${remain>0?`<button class="sm-btn-g" onclick="openAddLoanPayment('${l.id}')">+ ${cfg.childLabel}</button>`:''}
-      ${remain>0?`<button class="sm-btn" onclick="settleFullLoan('${l.id}')">Fully Settle</button>`:''}
+      <button class="sm-btn-g" onclick="openAddLoanPayment('${l.id}')">+ ${cfg.childLabel}</button>
+      <button class="sm-btn" onclick="settleFullLoan('${l.id}')">Fully Settle</button>
       <button class="sm-btn-b" onclick="openAddSubEntry('${l.id}')">+ Add More</button>
       <button class="sm-btn" onclick="showLoanReceipt('${l.id}')" style="display:flex;align-items:center;gap:5px;background:rgba(77,159,255,.08);border-color:rgba(77,159,255,.25);color:var(--blue);">${RECEIPT_SVG} Receipt</button>
       <button class="del-btn" style="margin-left:auto;" onclick="delLoan('${l.id}')">${TRASH_SVG}</button>
     </div></div>`;
   }
+
+  function hCard(l){
+    const sc=sC[l.type];
+    const statusLabel=getLoanStatusLabel(l);
+    const total=loanTotal(l);
+    const lIcCol=l.type==='deposit'?'#4d9fff':l.type==='loan_recv'?'#ffb020':'#9d6fff';
+    const lastPay=l.payments&&l.payments.length?l.payments[l.payments.length-1]:null;
+    const settledDate=lastPay?fmtD(lastPay.date):fmtD(l.date);
+    return`<div class="hist-card">
+      <div class="hist-icon" style="background:${lIcCol}18;color:${lIcCol};">${loanIco(l.type,18)}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${l.person}</div>
+        <span class="loan-type-badge" style="background:rgba(12,233,127,.1);color:var(--green);margin-top:4px;display:inline-block;">${statusLabel}</span>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--green);">${fmt(total)}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px;">${settledDate}</div>
+        <div style="display:flex;gap:6px;margin-top:7px;justify-content:flex-end;">
+          <button class="sm-btn" onclick="showLoanReceipt('${l.id}')" style="background:rgba(77,159,255,.08);border-color:rgba(77,159,255,.25);color:var(--blue);display:flex;align-items:center;gap:4px;">${RECEIPT_SVG} Receipt</button>
+          <button class="del-btn" onclick="delLoan('${l.id}')">${TRASH_SVG}</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function historySection(){
+    if(!histLoans.length)return'';
+    const count=histLoans.length;
+    return`<div class="hist-section">
+      <div class="hist-toggle" onclick="toggleHistSection()">
+        <div class="hist-toggle-line"></div>
+        <div class="hist-toggle-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          History (${count})
+        </div>
+        <div class="hist-toggle-line"></div>
+        <svg class="hist-toggle-chevron" id="hist-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div id="hist-body" style="display:none;">
+        ${histLoans.map(l=>hCard(l)).join('')}
+      </div>
+    </div>`;
+  }
+
   function personCentric(){
     const pm={};loans.forEach(l=>{if(!pm[l.person])pm[l.person]=[];pm[l.person].push(l);});
-    return Object.entries(pm).map(([person,pL])=>{const pa=pL.reduce((s,l)=>s+loanRemain(l),0);return`<div style="margin-bottom:18px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div style="font-size:15px;font-weight:800;">${person}</div><div style="font-size:12px;font-family:'Space Mono',monospace;color:${pa>0?'var(--amber)':'var(--green)'};font-weight:700;">${pa>0?fmt(pa)+' pending':'All settled'}</div></div>${pL.map(l=>lCard(l)).join('')}</div>`;}).join('');
+    const activeHTML=Object.entries(pm).map(([person,pL])=>{
+      const pa=pL.reduce((s,l)=>s+loanRemain(l),0);
+      return`<div style="margin-bottom:18px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div style="font-size:15px;font-weight:800;">${person}</div><div style="font-size:12px;font-family:'Space Mono',monospace;color:var(--amber);font-weight:700;">${fmt(pa)} pending</div></div>${pL.map(l=>lCard(l)).join('')}</div>`;
+    }).join('');
+    return activeHTML+historySection();
   }
+
   const sections=['deposit','loan_recv','loan_given'].map(type=>{
     if(loanF!=='all'&&loanF!==type)return'';
-    const sc=sC[type];const tl=loans.filter(l=>l.type===type);if(!tl.length)return'';
+    const sc=sC[type];const tl=loans.filter(l=>l.type===type);
+    if(!tl.length)return'';
     return`<div class="loan-section-hdr"><div class="loan-section-line"></div><div class="loan-section-title">${sc.title}</div><div class="loan-section-line"></div></div>${tl.map(l=>lCard(l)).join('')}`;
   }).join('');
+
+  const noActive=loans.length===0;
   return`<div class="section" style="padding-top:16px;">
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;"><div class="stat-card" style="border-color:rgba(255,61,90,.14);padding:11px;"><div class="st-lbl" style="font-size:9px;">I Owe</div><div class="st-val c-red" style="font-size:13px;margin-top:5px;">${fmt(iOwe)}</div></div><div class="stat-card" style="border-color:rgba(12,233,127,.14);padding:11px;"><div class="st-lbl" style="font-size:9px;">Owe Me</div><div class="st-val c-green" style="font-size:13px;margin-top:5px;">${fmt(owesMe)}</div></div><div class="stat-card" style="border-color:rgba(77,159,255,.14);padding:11px;"><div class="st-lbl" style="font-size:9px;">Deposits</div><div class="st-val c-blue" style="font-size:13px;margin-top:5px;">${fmt(depPend)}</div></div></div>
     <div class="filter-bar"><button class="fc ${loanF==='all'?'active':''}" onclick="setLoanF('all')">All</button><button class="fc ${loanF==='deposit'?'active':''}" onclick="setLoanF('deposit')">Deposits</button><button class="fc ${loanF==='loan_recv'?'active':''}" onclick="setLoanF('loan_recv')">Received</button><button class="fc ${loanF==='loan_given'?'active':''}" onclick="setLoanF('loan_given')">Given</button></div>
     <button class="btn btn-s" onclick="openAddLoan()" style="margin-bottom:14px;">+ New Entry</button>
-    ${S.loans.length===0?`<div class="empty"><div style="display:flex;justify-content:center;margin-bottom:12px;opacity:.4;">${ico('empty_loan',46)}</div><div class="empty-t">No records yet</div><div class="empty-s">Track deposits, loans received and given</div></div>`:loanF==='all'?(personCentric()||''):(sections||'')}
+    ${noActive&&!histLoans.length?`<div class="empty"><div style="display:flex;justify-content:center;margin-bottom:12px;opacity:.4;">${ico('empty_loan',46)}</div><div class="empty-t">No records yet</div><div class="empty-s">Track deposits, loans received and given</div></div>`:noActive?(historySection()):(loanF==='all'?(personCentric()||historySection()):(sections+historySection()))}
   </div>`;
 }
 function setLoanF(f){loanF=f;renderMain();}
+function toggleHistSection(){
+  const body=document.getElementById('hist-body');
+  const chevron=document.getElementById('hist-chevron');
+  if(!body)return;
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  if(chevron)chevron.classList.toggle('open',!isOpen);
+}
 
 // ============ LOAN PDF RECEIPT ============
 function showLoanReceipt(loanId){
   const l=S.loans.find(x=>x.id===loanId);if(!l)return;
   const cfg=LOAN_TYPES[l.type];
+  const receiptLabel=getLoanStatusLabel(l);
   const total=loanTotal(l);const paid=loanPaid(l);const remain=loanRemain(l);
   const wn=l.wallet?getWlt(l.wallet).name:'Not linked';
   const extras=l.extraEntries||[];const payments=l.payments||[];
   const tc=l.type==='deposit'?'#2563eb':l.type==='loan_recv'?'#d97706':'#7c3aed';
   const tb=l.type==='deposit'?'#eff6ff':l.type==='loan_recv'?'#fffbeb':'#f5f3ff';
-  const infoRows=[['Person / Organization',l.person],['Type',cfg.label],['Date',fmtD(l.date)],['Due Date',l.dueDate?fmtD(l.dueDate):'Not specified'],['Wallet',wn],...(l.note?[['Note',l.note]]:[])];
-  const previewHTML='<div class="receipt-preview"><div style="text-align:center;border-bottom:2px solid #0ce97f;padding-bottom:12px;margin-bottom:14px;"><div style="font-size:20px;font-weight:900;color:#0a0f1e;">n<span style="color:#0ce97f;">Transactions</span></div><div style="font-size:9px;color:#888;margin-top:3px;text-transform:uppercase;letter-spacing:1.2px;">Financial Receipt</div><div style="display:inline-block;margin-top:7px;padding:4px 12px;background:'+tb+';border-radius:8px;font-size:11px;font-weight:700;color:'+tc+';">'+cfg.label+'</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'+infoRows.map(([lb,v])=>'<div><div style="font-size:9px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:.8px;">'+lb+'</div><div style="font-size:12px;font-weight:700;color:#1a1a2e;margin-top:2px;">'+v+'</div></div>').join('')+'</div><div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:11px;"><div style="font-size:9px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;">Amount Summary</div><div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #f1f5f9;"><span style="color:#6b7280;">Initial Amount</span><span style="font-weight:700;color:#374151;">'+fmt(l.amount)+'</span></div>'+extras.map((e,i)=>'<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #f1f5f9;"><span style="color:#6b7280;">Extra '+(i+1)+(e.note?' - '+e.note:'')+'</span><span style="font-weight:700;color:#374151;">'+fmt(e.amount)+'</span></div>').join('')+(extras.length?'<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid #e5e7eb;"><span style="font-weight:700;color:#374151;">Total</span><span style="font-weight:800;color:#374151;">'+fmt(total)+'</span></div>':'')+'<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #f1f5f9;"><span style="color:#6b7280;">Total Paid</span><span style="font-weight:700;color:#059669;">'+fmt(paid)+'</span></div><div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;"><span style="font-weight:700;color:#374151;">Remaining</span><span style="font-weight:800;color:'+(remain<=0?'#059669':'#dc2626')+';">'+fmt(remain)+'</span></div>'+(remain<=0?'<div style="text-align:center;margin-top:6px;background:#d1fae5;border-radius:6px;padding:5px;font-size:12px;font-weight:700;color:#059669;">Fully Settled</div>':'')+'</div>'+(payments.length?'<div style="font-size:9px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin:10px 0 5px;">Payments ('+payments.length+')</div>'+payments.map((p,i)=>'<div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid #f1f5f9;"><span style="color:#6b7280;">'+(i+1)+'. '+fmtD(p.date)+(p.note?' - '+p.note:'')+'</span><span style="font-weight:700;color:#059669;">'+fmt(p.amount)+'</span></div>').join(''):'')+'</div>';
+  const infoRows=[['Person / Organization',l.person],['Type',receiptLabel],['Date',fmtD(l.date)],['Due Date',l.dueDate?fmtD(l.dueDate):'Not specified'],['Wallet',wn],...(l.note?[['Note',l.note]]:[])];
+  const previewHTML='<div class="receipt-preview"><div style="text-align:center;border-bottom:2px solid #0ce97f;padding-bottom:12px;margin-bottom:14px;"><div style="font-size:20px;font-weight:900;color:#0a0f1e;">n<span style="color:#0ce97f;">Transactions</span></div><div style="font-size:9px;color:#888;margin-top:3px;text-transform:uppercase;letter-spacing:1.2px;">Financial Receipt</div><div style="display:inline-block;margin-top:7px;padding:4px 12px;background:'+tb+';border-radius:8px;font-size:11px;font-weight:700;color:'+tc+';">'+receiptLabel+'</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'+infoRows.map(([lb,v])=>'<div><div style="font-size:9px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:.8px;">'+lb+'</div><div style="font-size:12px;font-weight:700;color:#1a1a2e;margin-top:2px;">'+v+'</div></div>').join('')+'</div><div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:11px;"><div style="font-size:9px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;">Amount Summary</div><div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #f1f5f9;"><span style="color:#6b7280;">Initial Amount</span><span style="font-weight:700;color:#374151;">'+fmt(l.amount)+'</span></div>'+extras.map((e,i)=>'<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #f1f5f9;"><span style="color:#6b7280;">Extra '+(i+1)+(e.note?' - '+e.note:'')+'</span><span style="font-weight:700;color:#374151;">'+fmt(e.amount)+'</span></div>').join('')+(extras.length?'<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid #e5e7eb;"><span style="font-weight:700;color:#374151;">Total</span><span style="font-weight:800;color:#374151;">'+fmt(total)+'</span></div>':'')+'<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #f1f5f9;"><span style="color:#6b7280;">Total Paid</span><span style="font-weight:700;color:#059669;">'+fmt(paid)+'</span></div><div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;"><span style="font-weight:700;color:#374151;">Remaining</span><span style="font-weight:800;color:'+(remain<=0?'#059669':'#dc2626')+';">'+fmt(remain)+'</span></div>'+(remain<=0?'<div style="text-align:center;margin-top:6px;background:#d1fae5;border-radius:6px;padding:5px;font-size:12px;font-weight:700;color:#059669;">Fully Settled</div>':'')+'</div>'+(payments.length?'<div style="font-size:9px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin:10px 0 5px;">Payments ('+payments.length+')</div>'+payments.map((p,i)=>'<div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid #f1f5f9;"><span style="color:#6b7280;">'+(i+1)+'. '+fmtD(p.date)+(p.note?' - '+p.note:'')+'</span><span style="font-weight:700;color:#059669;">'+fmt(p.amount)+'</span></div>').join(''):'')+'</div>';
   openModal(`<div class="modal-title">Loan Receipt</div>
   ${previewHTML}
   <div style="margin-top:12px;background:var(--blue-d);border:1px solid rgba(77,159,255,.2);border-radius:10px;padding:10px 13px;font-size:12px;color:var(--blue);">Opens in a new tab. Use <b>Print</b> (Ctrl+P) to save as PDF.</div>
@@ -928,14 +1044,16 @@ function buildReceiptHTML(l){
   const extras=l.extraEntries||[];const payments=l.payments||[];
   const now=new Date().toLocaleString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
   const rid='#'+l.id.toUpperCase().slice(-8);
-  const tc=l.type==='deposit'?'#2563eb':l.type==='loan_recv'?'#d97706':'#7c3aed';
-  const tb=l.type==='deposit'?'#eff6ff':l.type==='loan_recv'?'#fffbeb':'#f5f3ff';
-  const tbd=l.type==='deposit'?'#bfdbfe':l.type==='loan_recv'?'#fde68a':'#ddd6fe';
-  const dr=[['Person / Organization',l.person],['Transaction Type',cfg.label],['Date of Transaction',fmtD(l.date)],['Due Date',l.dueDate?fmtD(l.dueDate):'Not specified'],['Linked Wallet',wn],...(l.note?[['Note / Remarks',l.note]]:[])];
+  const receiptLabel=getLoanStatusLabel(l);
+  const isSettled=loanRemain(l)<=0;
+  const tc=l.type==='deposit'?'#2563eb':l.type==='loan_recv'?'#d97706':isSettled?'#059669':'#7c3aed';
+  const tb=l.type==='deposit'?'#eff6ff':l.type==='loan_recv'?'#fffbeb':isSettled?'#d1fae5':'#f5f3ff';
+  const tbd=l.type==='deposit'?'#bfdbfe':l.type==='loan_recv'?'#fde68a':isSettled?'#6ee7b7':'#ddd6fe';
+  const dr=[['Person / Organization',l.person],['Transaction Type',receiptLabel],['Date of Transaction',fmtD(l.date)],['Due Date',l.dueDate?fmtD(l.dueDate):'Not specified'],['Linked Wallet',wn],...(l.note?[['Note / Remarks',l.note]]:[])];
   const amtRows=[{lb:'Initial Amount',v:fmt(l.amount),col:'#374151',bold:false},...extras.map((e,i)=>({lb:'Additional Entry '+(i+1)+(e.note?' - '+e.note:''),v:fmt(e.amount),col:'#374151',bold:false})),...(extras.length?[{lb:'Total Amount',v:fmt(total),col:'#1a1a2e',bold:true}]:[]),{lb:'Total Paid / Settled',v:fmt(paid),col:'#059669',bold:false},{lb:'Remaining Balance',v:fmt(remain),col:remain<=0?'#059669':'#dc2626',bold:true}];
   const pRows=payments.map((p,i)=>`<tr style="${i%2===0?'background:#f9fafb;':''}"><td style="padding:9px 14px;color:#6b7280;">${i+1}</td><td style="padding:9px 14px;">${fmtD(p.date)}</td><td style="padding:9px 14px;font-weight:700;color:#059669;font-family:'Outfit',sans-serif;">${fmt(p.amount)}</td><td style="padding:9px 14px;color:#6b7280;">${p.wallet?getWlt(p.wallet).name:'-'}</td><td style="padding:9px 14px;color:#6b7280;">${p.note||'-'}</td></tr>`).join('');
   const eRows=extras.map((e,i)=>`<tr style="${i%2===0?'background:#f9fafb;':''}"><td style="padding:9px 14px;color:#6b7280;">${i+1}</td><td style="padding:9px 14px;">${fmtD(e.date)}</td><td style="padding:9px 14px;font-weight:700;color:#374151;font-family:'Outfit',sans-serif;">${fmt(e.amount)}</td><td style="padding:9px 14px;color:#6b7280;">${e.wallet?getWlt(e.wallet).name:'-'}</td><td style="padding:9px 14px;color:#6b7280;">${e.note||'-'}</td></tr>`).join('');
-  return`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Receipt ${rid} - nTransactions</title><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:'Outfit',sans-serif;background:#f1f5f9;color:#1a1a2e;padding:32px 16px;}.container{max-width:680px;margin:0 auto;background:#fff;border-radius:24px;box-shadow:0 12px 48px rgba(0,0,0,.12);overflow:hidden;}.hdr{background:linear-gradient(135deg,#07090f,#0d1420);padding:30px 36px;display:flex;align-items:flex-start;justify-content:space-between;}.logo{font-size:26px;font-weight:900;color:#e8edf5;}.logo span{color:#0ce97f;}.logo-sub{font-size:11px;color:#4a5568;margin-top:3px;}.hdr-r{text-align:right;}.r-lbl{font-size:10px;color:#4a5568;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;}.r-id{font-size:16px;color:#e8edf5;font-weight:800;margin-top:4px;}.type-badge{display:inline-block;padding:5px 12px;border-radius:9px;font-size:11px;font-weight:700;text-transform:uppercase;margin-top:7px;background:${tb};color:${tc};border:1px solid ${tbd};}.body{padding:30px 36px;}.sec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:#9ca3af;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f3f4f6;}.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px 22px;margin-bottom:26px;}.di label{font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.8px;font-weight:600;display:block;margin-bottom:3px;}.di .val{font-size:14px;font-weight:700;}.abox{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:18px;margin-bottom:22px;}.arow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;}.arow:last-child{border-bottom:none;}.arow .al{color:#6b7280;font-size:13px;}.arow .av{font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;}.arow.tot .al{color:#374151;font-weight:700;font-size:14px;}.arow.tot .av{font-size:15px;}.settled{display:block;text-align:center;margin-top:10px;padding:7px;background:#d1fae5;border-radius:9px;font-size:13px;font-weight:700;color:#059669;}table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:22px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;}thead{background:#f8fafc;}th{padding:9px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;font-weight:700;border-bottom:1px solid #e2e8f0;}td{border-bottom:1px solid #f1f5f9;}tr:last-child td{border-bottom:none;}.footer{background:#f8fafc;border-top:2px solid #e2e8f0;padding:22px 36px;}.disc{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:15px 17px;margin-bottom:16px;}.disc-t{font-size:11px;font-weight:800;color:#92400e;text-transform:uppercase;margin-bottom:5px;}.disc-b{font-size:12px;color:#78350f;line-height:1.75;}.fmeta{font-size:11px;color:#9ca3af;text-align:center;line-height:1.7;}.prbtn{display:block;width:100%;padding:13px;background:#07090f;color:#0ce97f;border:none;border-radius:11px;font-size:15px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:16px;}@media print{body{background:#fff;padding:0;}.container{box-shadow:none;border-radius:0;max-width:100%;}.prbtn{display:none;}}</style></head><body><div class="container"><div class="hdr"><div><div class="logo">n<span>Transactions</span></div><div class="logo-sub">Personal Finance Tracker</div><div class="type-badge">${cfg.label}</div></div><div class="hdr-r"><div class="r-lbl">Receipt</div><div class="r-id">${rid}</div><div style="font-size:11px;color:#4a5568;margin-top:5px;">${now}</div></div></div><div class="body"><div class="sec-lbl">Transaction Details</div><div class="dgrid">${dr.map(([lb,v])=>`<div class="di"><label>${lb}</label><div class="val">${v}</div></div>`).join('')}</div><div class="sec-lbl">Amount Breakdown</div><div class="abox">${amtRows.map(r=>`<div class="arow${r.bold?' tot':''}"><span class="al">${r.lb}</span><span class="av" style="color:${r.col};">${r.v}</span></div>`).join('')}${remain<=0?'<div class="settled">Fully Settled - No Outstanding Balance</div>':''}</div>${extras.length?`<div class="sec-lbl">Additional Entries</div><table><thead><tr><th>#</th><th>Date</th><th>Amount</th><th>Wallet</th><th>Note</th></tr></thead><tbody>${eRows}</tbody></table>`:''}${payments.length?`<div class="sec-lbl">Payment History</div><table><thead><tr><th>#</th><th>Date</th><th>Amount</th><th>Wallet</th><th>Note</th></tr></thead><tbody>${pRows}</tbody></table>`:''}</div><div class="footer"><div class="disc"><div class="disc-t">Important Notice</div><div class="disc-b">This document has been automatically generated by <strong>nTransactions</strong> and serves as a digital financial record for reference purposes only. It does not constitute a legally binding financial instrument.</div></div><div class="fmeta">Generated by nTransactions - ${now}<br>Receipt ${rid} - ${l.person}</div><button class="prbtn" onclick="window.print()">Print / Save as PDF</button></div></div></body></html>`;
+  return`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Receipt ${rid} - nTransactions</title><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:'Outfit',sans-serif;background:#f1f5f9;color:#1a1a2e;padding:32px 16px;}.container{max-width:680px;margin:0 auto;background:#fff;border-radius:24px;box-shadow:0 12px 48px rgba(0,0,0,.12);overflow:hidden;}.hdr{background:linear-gradient(135deg,#07090f,#0d1420);padding:30px 36px;display:flex;align-items:flex-start;justify-content:space-between;}.logo{font-size:26px;font-weight:900;color:#e8edf5;}.logo span{color:#0ce97f;}.logo-sub{font-size:11px;color:#4a5568;margin-top:3px;}.hdr-r{text-align:right;}.r-lbl{font-size:10px;color:#4a5568;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;}.r-id{font-size:16px;color:#e8edf5;font-weight:800;margin-top:4px;}.type-badge{display:inline-block;padding:5px 12px;border-radius:9px;font-size:11px;font-weight:700;text-transform:uppercase;margin-top:7px;background:${tb};color:${tc};border:1px solid ${tbd};}.body{padding:30px 36px;}.sec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:#9ca3af;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f3f4f6;}.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px 22px;margin-bottom:26px;}.di label{font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.8px;font-weight:600;display:block;margin-bottom:3px;}.di .val{font-size:14px;font-weight:700;}.abox{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:18px;margin-bottom:22px;}.arow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;}.arow:last-child{border-bottom:none;}.arow .al{color:#6b7280;font-size:13px;}.arow .av{font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;}.arow.tot .al{color:#374151;font-weight:700;font-size:14px;}.arow.tot .av{font-size:15px;}.settled{display:block;text-align:center;margin-top:10px;padding:7px;background:#d1fae5;border-radius:9px;font-size:13px;font-weight:700;color:#059669;}table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:22px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;}thead{background:#f8fafc;}th{padding:9px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;font-weight:700;border-bottom:1px solid #e2e8f0;}td{border-bottom:1px solid #f1f5f9;}tr:last-child td{border-bottom:none;}.footer{background:#f8fafc;border-top:2px solid #e2e8f0;padding:22px 36px;}.disc{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:15px 17px;margin-bottom:16px;}.disc-t{font-size:11px;font-weight:800;color:#92400e;text-transform:uppercase;margin-bottom:5px;}.disc-b{font-size:12px;color:#78350f;line-height:1.75;}.fmeta{font-size:11px;color:#9ca3af;text-align:center;line-height:1.7;}.prbtn{display:block;width:100%;padding:13px;background:#07090f;color:#0ce97f;border:none;border-radius:11px;font-size:15px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:16px;}@media print{body{background:#fff;padding:0;}.container{box-shadow:none;border-radius:0;max-width:100%;}.prbtn{display:none;}}</style></head><body><div class="container"><div class="hdr"><div><div class="logo">n<span>Transactions</span></div><div class="logo-sub">Personal Finance Tracker</div><div class="type-badge">${receiptLabel}</div></div><div class="hdr-r"><div class="r-lbl">Receipt</div><div class="r-id">${rid}</div><div style="font-size:11px;color:#4a5568;margin-top:5px;">${now}</div></div></div><div class="body"><div class="sec-lbl">Transaction Details</div><div class="dgrid">${dr.map(([lb,v])=>`<div class="di"><label>${lb}</label><div class="val">${v}</div></div>`).join('')}</div><div class="sec-lbl">Amount Breakdown</div><div class="abox">${amtRows.map(r=>`<div class="arow${r.bold?' tot':''}"><span class="al">${r.lb}</span><span class="av" style="color:${r.col};">${r.v}</span></div>`).join('')}${remain<=0?'<div class="settled">Fully Settled - No Outstanding Balance</div>':''}</div>${extras.length?`<div class="sec-lbl">Additional Entries</div><table><thead><tr><th>#</th><th>Date</th><th>Amount</th><th>Wallet</th><th>Note</th></tr></thead><tbody>${eRows}</tbody></table>`:''}${payments.length?`<div class="sec-lbl">Payment History</div><table><thead><tr><th>#</th><th>Date</th><th>Amount</th><th>Wallet</th><th>Note</th></tr></thead><tbody>${pRows}</tbody></table>`:''}</div><div class="footer"><div class="disc"><div class="disc-t">Important Notice</div><div class="disc-b">This document has been automatically generated by <strong>nTransactions</strong> and serves as a digital financial record for reference purposes only. It does not constitute a legally binding financial instrument.</div></div><div class="fmeta">Generated by nTransactions - ${now}<br>Receipt ${rid} - ${l.person}</div><button class="prbtn" onclick="window.print()">Print / Save as PDF</button></div></div></body></html>`;
 }
 
 // ============ MODALS ============
