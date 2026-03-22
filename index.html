@@ -267,8 +267,6 @@ select.fi{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='
 </head>
 <body>
 
-<div class="sb-backdrop" onclick="closeSidebar()"></div>
-
 <div id="pwa-banner">
   <div class="pwa-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0ce97f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
   <div class="pwa-text"><div class="pwa-t">Install nTransactions</div><div class="pwa-s">Add to Home Screen for app experience</div></div>
@@ -277,6 +275,7 @@ select.fi{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='
 </div>
 
 <div id="app">
+<div class="sb-backdrop" onclick="closeSidebar()"></div>
   <header class="header">
     <div style="display:flex;align-items:center;gap:8px;">
       <button class="sb-ham-btn" onclick="toggleSidebar()" title="Menu" style="background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;padding:7px 9px;cursor:pointer;color:var(--text2);">
